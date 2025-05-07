@@ -1,0 +1,339 @@
+@{
+    ViewData["Title"] = "Iniciar sesión";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<style>
+    .fade-in-login {
+        opacity: 0;
+        transform: translateY(20px) scale(0.98);
+        animation: fadeInMove 1s cubic-bezier(0.4,0,0.2,1) 0.1s forwards;
+    }
+    .fade-in-login-noanim {
+        opacity: 1 !important;
+        transform: none !important;
+        animation: none !important;
+    }
+    @@keyframes fadeInMove {
+        to {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+        }
+    }
+    .card-elegant {
+        border-radius: 1.25rem;
+        box-shadow: 0 4px 24px 0 rgba(0,0,0,0.07);
+        border: none;
+        background: #fff;
+        transition: box-shadow 0.3s;
+    }
+    .card-elegant:hover {
+        box-shadow: 0 8px 32px 0 rgba(0,0,0,0.12);
+    }
+    .login-title {
+        font-size: 2rem;
+        font-weight: 700;
+        color: #222;
+        margin-bottom: 0.5rem; /* Reducido para acercar el mensaje de error */
+        text-align: center;
+    }
+    .form-label {
+        font-weight: 500;
+        color: #333;
+    }
+    .form-control {
+        border-radius: 0.75rem;
+        font-size: 1.05rem;
+        padding: 0.75rem 1rem;
+        border: 1.5px solid #e0e0e0;
+        transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    .form-control:focus {
+        border-color: #6c63ff !important;
+        box-shadow: 0 0 0 0.12rem #6c63ff22 !important;
+        outline: none !important;
+        background: #fff !important;
+        transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    .btn-elegant {
+        border-radius: 0.75rem;
+        padding: 0.75rem 2.5rem;
+        font-size: 1.1rem;
+        transition: background 0.2s, color 0.2s, box-shadow 0.2s;
+        box-shadow: 0 2px 8px 0 rgba(108,99,255,0.08);
+    }
+    .btn-elegant-primary {
+        background: #6c63ff;
+        color: #fff;
+        border: none;
+    }
+    .btn-elegant-primary:hover {
+        background: #554ee0;
+        color: #fff;
+    }
+    .btn-elegant.btn-login-loading {
+        background: #fff !important;
+        color: #6c63ff !important;
+        box-shadow: 0 4px 24px 0 rgba(108,99,255,0.13) !important;
+        outline: none !important;
+        border: none !important;
+    }
+    .btn-elegant.btn-login-loading:focus, .btn-elegant.btn-login-loading:active {
+        outline: none !important;
+        box-shadow: 0 4px 24px 0 rgba(108,99,255,0.13) !important;
+        border: none !important;
+        background: #fff !important;
+        color: #6c63ff !important;
+    }
+    .btn-elegant:focus, .btn-elegant:active {
+        outline: none !important;
+        box-shadow: 0 4px 24px 0 rgba(108,99,255,0.13) !important;
+        border: none !important;
+        background: #fff !important;
+        color: #6c63ff !important;
+    }
+    .spinner-border {
+        animation: spinner-border 1.8s linear infinite !important;
+    }
+    @@keyframes spinner-border {
+        100% {
+            transform: rotate(360deg);
+        }
+    }
+    .is-invalid {
+        border-color: #e74c3c !important;
+        box-shadow: 0 0 0 0.15rem #e74c3c22 !important;
+    }
+    .invalid-feedback {
+        color: #e74c3c;
+        font-size: 0.97rem;
+        display: none;
+        opacity: 0;
+        transition: opacity 0.3s;
+    }
+    .invalid-feedback.show {
+        display: block;
+        opacity: 1;
+        animation: fadeIn 0.5s;
+    }
+    @@keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+
+    .login-error-toast {
+        position: relative;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        background: #fff0f3;
+        color: #c0392b;
+        border-radius: 0.7rem;
+        border: 1px solid #ffd6db;
+        font-size: 0.98rem;
+        font-weight: 500;
+        padding: 0.7rem 1.1rem;
+        box-shadow: 0 2px 8px 0 rgba(192,57,43,0.06);
+        opacity: 0;
+        transform: translateY(-16px);
+        pointer-events: none;
+        transition: opacity 0.4s cubic-bezier(0.4,0,0.2,1), transform 0.4s cubic-bezier(0.4,0,0.2,1);
+        margin-bottom: 0;
+    }
+    .login-error-toast.show {
+        opacity: 1;
+        transform: translateY(0);
+        pointer-events: auto;
+        margin-bottom: 0.3rem;
+    }
+    .login-error-toast.hide {
+        opacity: 0;
+        transform: translateY(-16px);
+        pointer-events: none;
+        transition: opacity 0.4s cubic-bezier(0.4,0,0.2,1), transform 0.4s cubic-bezier(0.4,0,0.2,1);
+    }
+    @@keyframes toastFadeInOutMove {
+        0% {
+            opacity: 0;
+            transform: translateY(-16px);
+        }
+        10% {
+            opacity: 1;
+            transform: translateY(0);
+            pointer-events: auto;
+        }
+        85% {
+            opacity: 1;
+            transform: translateY(0);
+            pointer-events: auto;
+        }
+        100% {
+            opacity: 0;
+            transform: translateY(-32px);
+            pointer-events: none;
+        }
+    }
+    .login-form-animate {
+        transition: margin-top 0.4s cubic-bezier(0.4,0,0.2,1);
+        margin-top: 0.3rem;
+    }
+    .login-form-animate.no-toast {
+        margin-top: 0;
+    }
+
+    .login-success-toast {
+        position: relative;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        background: #f0fff4;
+        color: #27ae60;
+        border-radius: 0.7rem;
+        border: 1px solid #baf7d0;
+        font-size: 0.98rem;
+        font-weight: 500;
+        padding: 0.7rem 1.1rem;
+        box-shadow: 0 2px 8px 0 rgba(39,174,96,0.06);
+        opacity: 0;
+        transform: translateY(-16px);
+        pointer-events: none;
+        transition: opacity 0.4s cubic-bezier(0.4,0,0.2,1), transform 0.4s cubic-bezier(0.4,0,0.2,1);
+        margin-bottom: 0;
+    }
+    .login-success-toast.show {
+        opacity: 1;
+        transform: translateY(0);
+        pointer-events: auto;
+        margin-bottom: 0.3rem;
+    }
+    .login-success-toast.hide {
+        opacity: 0;
+        transform: translateY(-16px);
+        pointer-events: none;
+        transition: opacity 0.4s cubic-bezier(0.4,0,0.2,1), transform 0.4s cubic-bezier(0.4,0,0.2,1);
+    }
+</style>
+
+<div class="row justify-content-center align-items-center fade-in-login@(ViewBag.Error != null ? "-noanim" : "")" style="min-height: 70vh;">
+    <div class="col-md-6 col-lg-5">
+        <div class="card card-elegant p-4">
+            <div class="card-body">
+                <div class="login-title">
+                    Iniciar sesión
+                </div>
+                @if (ViewBag.Error != null)
+                {
+                    <div id="loginErrorToast" class="login-error-toast">
+                        <i class="fa fa-exclamation-circle me-2"></i>@ViewBag.Error
+                    </div>
+                }
+                @if (TempData["Success"] != null)
+                {
+                    <div id="loginSuccessToast" class="login-success-toast">
+                        <i class="fa fa-check-circle me-2"></i>@TempData["Success"]
+                    </div>
+                }
+                <form id="loginForm" method="post" autocomplete="off" class="login-form-animate">
+                    <div class="mb-3">
+                        <label for="username" class="form-label">Usuario</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-white"><i class="fa fa-user"></i></span>
+                            <input type="text" class="form-control" id="username" name="username" placeholder="Ingresa tu usuario" required autocomplete="username">
+                        </div>
+                        <div id="usernameError" class="invalid-feedback">Por favor, ingresa tu usuario.</div>
+                    </div>
+                    <div class="mb-4">
+                        <label for="password" class="form-label">Contraseña</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-white"><i class="fa fa-lock"></i></span>
+                            <input type="password" class="form-control" id="password" name="password" placeholder="Ingresa tu contraseña" required autocomplete="current-password">
+                        </div>
+                        <div id="passwordError" class="invalid-feedback">Por favor, ingresa tu contraseña.</div>
+                    </div>
+                    <button id="loginBtn" type="submit" class="btn btn-elegant btn-elegant-primary w-100 fw-bold" style="min-height: 44px;">
+                        <span id="loginText" class="w-100 text-center">Entrar</span>
+                        <span id="spinner" class="spinner-border spinner-border-sm text-dark ms-2" style="display:none; vertical-align: middle;" role="status" aria-hidden="true">
+                            <span class="visually-hidden">Cargando...</span>
+                        </span>
+                    </button>
+                    <div class="text-center mt-3">
+                        <a href="#" class="text-decoration-none" style="color:#6c63ff; font-size:0.98rem;">¿Olvidaste tu contraseña?</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+// Solo validación visual, no bloquea el submit real
+const loginForm = document.getElementById('loginForm');
+loginForm.addEventListener('submit', function(e) {
+    let valid = true;
+    const username = document.getElementById('username');
+    const password = document.getElementById('password');
+    const usernameError = document.getElementById('usernameError');
+    const passwordError = document.getElementById('passwordError');
+    username.classList.remove('is-invalid');
+    password.classList.remove('is-invalid');
+    usernameError.classList.remove('show');
+    passwordError.classList.remove('show');
+    if (!username.value.trim()) {
+        username.classList.add('is-invalid');
+        usernameError.classList.add('show');
+        valid = false;
+    }
+    if (!password.value.trim()) {
+        password.classList.add('is-invalid');
+        passwordError.classList.add('show');
+        valid = false;
+    }
+    if (!valid) {
+        e.preventDefault();
+    } else {
+        // Cambia el fondo y color del botón de forma elegante
+        const btn = document.getElementById('loginBtn');
+        btn.classList.remove('btn-elegant-primary');
+        btn.classList.add('btn-login-loading');
+        btn.blur(); // quita el focus visual
+        document.getElementById('loginText').style.display = 'none';
+        const spinner = document.getElementById('spinner');
+        spinner.style.display = 'inline-block';
+        setTimeout(function() {
+            loginForm.submit();
+        }, 1200);
+        e.preventDefault();
+    }
+});
+
+window.addEventListener('DOMContentLoaded', function() {
+    const errorToast = document.getElementById('loginErrorToast');
+    const successToast = document.getElementById('loginSuccessToast');
+    const loginRow = document.querySelector('.fade-in-login-noanim, .fade-in-login');
+    if (errorToast && loginRow) {
+        setTimeout(function() {
+            errorToast.classList.add('show');
+            errorToast.style.display = 'block';
+        }, 50);
+        setTimeout(function() {
+            errorToast.classList.remove('show');
+            // Espera la transición antes de ocultar completamente
+            setTimeout(function() {
+                errorToast.style.display = 'none';
+                loginRow.classList.remove('fade-in-login-noanim');
+            }, 400);
+        }, 3200);
+    }
+    if (successToast && loginRow) {
+        setTimeout(function() {
+            successToast.classList.add('show');
+            successToast.style.display = 'block';
+        }, 50);
+        setTimeout(function() {
+            successToast.classList.remove('show');
+            setTimeout(function() {
+                successToast.style.display = 'none';
+            }, 400);
+        }, 3200);
+    }
+});
+</script>

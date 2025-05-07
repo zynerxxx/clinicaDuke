@@ -1,0 +1,193 @@
+﻿@{
+    ViewData["Title"] = "Inicio";
+}
+
+@if (TempData["LogoutMessage"] != null)
+{
+    <div class="logout-toast-elegant" role="alert" id="logoutToast">
+        <i class="fa fa-check-circle me-2"></i>@TempData["LogoutMessage"]
+    </div>
+}
+
+<style>
+    .fade-in-home {
+        opacity: 0;
+        transform: translateY(20px) scale(0.98);
+        animation: fadeInMove 1s cubic-bezier(0.4,0,0.2,1) 0.1s forwards;
+    }
+    @@keyframes fadeInMove {
+        to {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+        }
+    }
+    .card-elegant {
+        border-radius: 1.25rem;
+        box-shadow: 0 4px 24px 0 rgba(0,0,0,0.07);
+        border: none;
+        background: #fff;
+        transition: box-shadow 0.3s;
+    }
+    .card-elegant:hover {
+        box-shadow: 0 8px 32px 0 rgba(0,0,0,0.12);
+    }
+    .feature-icon {
+        font-size: 2rem;
+        color: #6c63ff;
+        margin-bottom: 0.5rem;
+        opacity: 0.85;
+        transition: color 0.3s;
+    }
+    .feature-title {
+        font-weight: 600;
+        color: #222;
+        margin-bottom: 0.25rem;
+    }
+    .feature-desc {
+        color: #555;
+        font-size: 1rem;
+    }
+    .btn-elegant {
+        border-radius: 0.75rem;
+        padding: 0.75rem 2.5rem;
+        font-size: 1.1rem;
+        transition: background 0.2s, color 0.2s, box-shadow 0.2s;
+        box-shadow: 0 2px 8px 0 rgba(108,99,255,0.08);
+    }
+    .btn-elegant-primary {
+        background: #6c63ff;
+        color: #fff;
+        border: none;
+    }
+    .btn-elegant-primary:hover {
+        background: #554ee0;
+        color: #fff;
+    }
+    .btn-elegant-primary:focus, .btn-elegant-primary:active {
+        outline: none !important;
+        box-shadow: 0 4px 24px 0 rgba(108,99,255,0.13) !important;
+        border: none !important;
+        background: #554ee0 !important;
+        color: #fff !important;
+    }
+    .btn-elegant-outline {
+        background: #fff;
+        color: #6c63ff;
+        border: 1.5px solid #6c63ff;
+    }
+    .btn-elegant-outline:hover {
+        background: #f3f2fd;
+        color: #554ee0;
+    }
+    .title-elegant {
+        font-size: 2.5rem;
+        font-weight: 700;
+        letter-spacing: -1px;
+        color: #222;
+    }
+    .title-elegant .highlight {
+        color: #6c63ff;
+        font-weight: 700;
+    }
+    .desc-elegant {
+        color: #666;
+        font-size: 1.15rem;
+        margin-bottom: 2.5rem;
+    }
+    .logout-toast-elegant {
+        position: fixed;
+        top: 2.2rem;
+        left: 50%;
+        transform: translateX(-50%);
+        z-index: 1055;
+        background: #f6fef9;
+        color: #2e7d4f;
+        border-radius: 0.7rem;
+        border: 1px solid #d2f5e3;
+        font-size: 0.98rem;
+        font-weight: 500;
+        padding: 0.65rem 1.1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        box-shadow: 0 2px 8px 0 rgba(46,125,79,0.04);
+        animation: fadeIn 0.7s;
+        max-width: 350px;
+        justify-content: center;
+        opacity: 1;
+        transition: opacity 0.7s;
+    }
+    .logout-toast-elegant.hide {
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.7s;
+    }
+    .logout-toast-elegant .fa-check-circle {
+        font-size: 1.1em;
+        color: #43a047;
+        opacity: 0.8;
+    }
+</style>
+
+<div class="container fade-in-home mt-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            <div class="card card-elegant p-4">
+                <div class="card-body">
+                    <h1 class="title-elegant text-center mb-3">
+                        ¡Bienvenido al <span class="highlight">Sistema de Inventario</span>!
+                    </h1>
+                    <p class="desc-elegant text-center mb-4">
+                        Administra el stock, consulta productos y controla el ingreso y salida de medicamentos de manera eficiente y segura.
+                    </p>
+                    <div class="row g-4 mb-4">
+                        <div class="col-md-4">
+                            <div class="h-100 text-center p-4">
+                                <i class="fa fa-box feature-icon"></i>
+                                <div class="feature-title">Inventario</div>
+                                <div class="feature-desc">Consulta y gestiona el stock de todos los medicamentos disponibles.</div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="h-100 text-center p-4">
+                                <i class="fa fa-exchange-alt feature-icon"></i>
+                                <div class="feature-title">Movimientos</div>
+                                <div class="feature-desc">Registra entradas y salidas de productos de forma rápida y sencilla.</div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="h-100 text-center p-4">
+                                <i class="fa fa-chart-line feature-icon"></i>
+                                <div class="feature-title">Reportes</div>
+                                <div class="feature-desc">Genera reportes de inventario y movimientos para un mejor control.</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="text-center mt-4">
+                        <a class="btn btn-elegant btn-elegant-primary me-2" asp-controller="Account" asp-action="Login" style="outline: none; box-shadow: 0 4px 24px 0 rgba(108,99,255,0.13); border: none; background: #6c63ff; color: #fff; transition: background 0.2s, color 0.2s, box-shadow 0.2s;">
+                            <i class="fa fa-sign-in-alt"></i> Iniciar sesión
+                        </a>
+                        <a class="btn btn-elegant btn-elegant-outline ms-2" asp-controller="Home" asp-action="Privacy">
+                            <i class="fa fa-info-circle"></i> Más información
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Oculta el mensaje de logout después de 2.5 segundos
+window.addEventListener('DOMContentLoaded', function() {
+    var msg = document.getElementById('logoutToast');
+    if (msg) {
+        setTimeout(function() {
+            msg.classList.add('hide');
+        }, 2500);
+        setTimeout(function() {
+            if (msg) msg.style.display = 'none';
+        }, 3200);
+    }
+});
+</script>

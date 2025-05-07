@@ -1,0 +1,165 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - Clinica Duke</title>
+    <script type="importmap"></script>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/clinicaDukeDB.styles.css" asp-append-version="true" />
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet" />
+</head>
+<body>
+    <header>
+        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
+            <div class="container-fluid">
+                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">Clinica Duke</a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
+                        aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
+                    <ul class="navbar-nav flex-grow-1">
+                        <li class="nav-item">
+                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+                        </li>
+                    </ul>
+                    <ul class="navbar-nav ms-auto">
+                        @{
+                            var userName = User.Identity != null && User.Identity.IsAuthenticated
+                                ? (User.Identity.Name ?? "Usuario")
+                                : "Usuario";
+                        }
+                        @if (User.Identity != null && User.Identity.IsAuthenticated)
+                        {
+                            <li class="nav-item dropdown">
+                                <a class="nav-link dropdown-toggle d-flex align-items-center px-3 py-2 rounded-pill bg-light shadow-sm" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false" style="gap:0.5rem; min-width: 160px; transition:box-shadow 0.2s, background 0.2s;">
+                                    <span class="me-1"><i class="fa fa-user-circle fa-lg text-primary"></i></span>
+                                    <span class="fw-semibold" style="color:#444;">@userName</span>
+                                </a>
+                                <ul class="dropdown-menu dropdown-menu-end shadow border-0 user-dropdown-animate" aria-labelledby="userDropdown" style="border-radius:1rem; min-width:180px;">
+                                    <li>
+                                        <form id="logoutForm" asp-controller="Account" asp-action="Logout" method="post" class="d-inline">
+                                            <button type="submit" class="dropdown-item logout-btn-elegant bg-light rounded-pill shadow-sm d-flex align-items-center gap-2 px-3 py-2 w-100" style="color: #c0392b; font-weight: 600; transition:background 0.2s, color 0.2s;">
+                                                <i class="fa fa-sign-out-alt"></i> <span class="fw-semibold">Cerrar sesión</span>
+                                            </button>
+                                        </form>
+                                    </li>
+                                </ul>
+                            </li>
+                        }
+                        else
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link text-dark px-3 py-2 rounded-pill bg-light shadow-sm d-flex align-items-center gap-2" asp-area="" asp-controller="Account" asp-action="Login" style="transition:background 0.2s;">
+                                    <i class="fa fa-sign-in-alt"></i> <span class="fw-semibold">Iniciar sesión</span>
+                                </a>
+                            </li>
+                        }
+                    </ul>
+                </div>
+            </div>
+        </nav>
+    </header>
+    <div class="container">
+        <main role="main" class="pb-3">
+            @RenderBody()
+        </main>
+    </div>
+
+    <footer class="border-top footer text-muted">
+        <div class="container">
+            &copy; 2025 - clinicaDuke - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+        </div>
+    </footer>
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+    <style>
+        .user-dropdown-animate {
+            animation: dropdownFadeIn 0.35s cubic-bezier(0.4,0,0.2,1);
+            transform-origin: top right;
+            text-align: center;
+        }
+        @@keyframes dropdownFadeIn {
+            0% { opacity: 0; transform: scale(0.96) translateY(-10px); }
+            100% { opacity: 1; transform: scale(1) translateY(0); }
+        }
+        .logout-btn-elegant {
+            background: transparent !important;
+            color: #c0392b !important;
+            border: none;
+            font-weight: 600;
+            box-shadow: none !important;
+            font-size: 1.05rem;
+            padding: 0.55rem 1.2rem !important;
+            min-width: unset !important;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            width: 100%;
+            min-width: 0 !important;
+            border-radius: 2rem !important;
+            transition: color 0.2s;
+            cursor: pointer;
+            pointer-events: auto;
+        }
+        .logout-btn-elegant:hover, .logout-btn-elegant:focus {
+            background: transparent !important;
+            color: #a93226 !important;
+            box-shadow: none !important;
+        }
+        .navbar-nav .dropdown-menu {
+            background: #f7f7fd !important;
+            box-shadow: 0 2px 8px 0 rgba(108,99,255,0.06) !important;
+            border-radius: 2rem !important;
+            min-width: 0;
+            width: auto;
+            padding: 0.35rem 0.7rem;
+            margin: 0;
+            border: none;
+            text-align: center;
+            transition: background 0.2s, box-shadow 0.2s;
+        }
+        .navbar-nav .dropdown-menu:hover,
+        .navbar-nav .dropdown-menu:focus-within {
+            background: #ecebfa !important;
+            box-shadow: 0 4px 16px 0 rgba(108,99,255,0.13) !important;
+        }
+        .navbar-nav .dropdown-menu:hover .logout-btn-elegant,
+        .navbar-nav .dropdown-menu:focus-within .logout-btn-elegant {
+            background: transparent !important;
+            color: #a93226 !important;
+        }
+        .navbar-nav .dropdown-item {
+            border-radius: 1.2rem;
+            font-size: 0.98rem;
+            font-weight: 500;
+            padding: 0.35rem 0.9rem;
+            transition: background 0.2s, color 0.2s;
+        }
+        .navbar-nav .dropdown-item:active, .navbar-nav .dropdown-item:focus, .navbar-nav .dropdown-item:hover {
+            background: #f3f2fd00;
+            color: #554ee0;
+        }
+        .navbar-nav .nav-link.bg-light {
+            background: #f7f7fd !important;
+            box-shadow: 0 2px 8px 0 rgba(108,99,255,0.06);
+            border-radius: 2rem;
+            font-size: 1.05rem;
+            font-weight: 500;
+            transition: background 0.2s, box-shadow 0.2s;
+        }
+        .navbar-nav .nav-link.bg-light:hover {
+            background: #ecebfa !important;
+            box-shadow: 0 4px 16px 0 rgba(108,99,255,0.13);
+        }
+    </style>
+</body>
+</html>

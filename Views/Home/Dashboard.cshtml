@@ -1,0 +1,190 @@
+@{
+    ViewData["Title"] = "Dashboard";
+}
+
+@if (TempData["Success"] != null)
+{
+    <div class="dashboard-toast-success" id="dashboardSuccessToast">
+        <i class="fa fa-check-circle me-2"></i>@TempData["Success"]
+    </div>
+}
+
+<style>
+    .fade-in-dashboard {
+        opacity: 0;
+        transform: translateY(20px) scale(0.98);
+        animation: fadeInMove 1.2s cubic-bezier(0.4,0,0.2,1) 0.1s forwards;
+    }
+    @@keyframes fadeInMove {
+        to {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+        }
+    }
+    .dashboard-title {
+        font-size: 2.2rem;
+        font-weight: 700;
+        color: #222;
+        margin-bottom: 2.2rem;
+        text-align: center;
+        letter-spacing: -1px;
+    }
+    .dashboard-title .fa {
+        font-size: 2.1rem;
+        margin-right: 0.5rem;
+        color: #222;
+        opacity: 0.85;
+    }
+    .dashboard-section {
+        border-radius: 1.25rem;
+        box-shadow: 0 2px 16px 0 rgba(0,0,0,0.06);
+        background: #fff;
+        padding: 2.2rem 1.5rem 1.5rem 1.5rem;
+        margin-bottom: 2.2rem;
+        transition: box-shadow 0.3s;
+        border: none;
+    }
+    .dashboard-section:hover {
+        box-shadow: 0 8px 32px 0 rgba(108,99,255,0.10);
+    }
+    .dashboard-section h4 {
+        font-size: 1.25rem;
+        font-weight: 600;
+        color: #6c63ff;
+        margin-bottom: 1rem;
+        letter-spacing: -0.5px;
+    }
+    .dashboard-section .fa {
+        margin-right: 0.5rem;
+        opacity: 0.8;
+    }
+    .dashboard-section ul {
+        padding-left: 1.2rem;
+    }
+    .dashboard-section li {
+        margin-bottom: 0.5rem;
+        font-size: 1.05rem;
+        color: #444;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    .dashboard-section li .fa {
+        font-size: 1rem;
+    }
+    .dashboard-summary {
+        display: flex;
+        gap: 2rem;
+        justify-content: center;
+        margin-bottom: 2rem;
+        flex-wrap: wrap;
+    }
+    .summary-card {
+        background: #f7f7fd;
+        border-radius: 1rem;
+        box-shadow: 0 2px 8px 0 rgba(108,99,255,0.06);
+        padding: 1.2rem 2rem;
+        min-width: 180px;
+        text-align: center;
+        transition: box-shadow 0.3s, background 0.3s;
+    }
+    .summary-card:hover {
+        background: #ecebfa;
+        box-shadow: 0 4px 16px 0 rgba(108,99,255,0.13);
+    }
+    .summary-icon {
+        font-size: 1.7rem;
+        color: #6c63ff;
+        margin-bottom: 0.3rem;
+        opacity: 0.9;
+    }
+    .summary-title {
+        font-size: 1.05rem;
+        color: #555;
+        margin-bottom: 0.1rem;
+    }
+    .summary-value {
+        font-size: 1.35rem;
+        font-weight: 700;
+        color: #222;
+    }
+    .dashboard-toast-success {
+        position: fixed;
+        top: 2.2rem;
+        left: 50%;
+        transform: translateX(-50%);
+        z-index: 1055;
+        background: #f0fff4;
+        color: #27ae60;
+        border-radius: 0.7rem;
+        border: 1px solid #baf7d0;
+        font-size: 0.98rem;
+        font-weight: 500;
+        padding: 0.7rem 1.1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        box-shadow: 0 2px 8px 0 rgba(39,174,96,0.06);
+        opacity: 1;
+        animation: fadeIn 0.7s, fadeOut 0.7s 2.7s forwards;
+        max-width: 350px;
+        justify-content: center;
+    }
+    @@keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+    @@keyframes fadeOut {
+        from { opacity: 1; }
+        to { opacity: 0; pointer-events: none; }
+    }
+</style>
+
+<div class="container fade-in-dashboard mt-5">
+    <div class="dashboard-title">
+        <i class="fa fa-tachometer-alt text-dark"></i> Dashboard
+    </div>
+    <div class="dashboard-summary">
+        <div class="summary-card">
+            <div class="summary-icon"><i class="fa fa-box"></i></div>
+            <div class="summary-title">Medicamentos</div>
+            <div class="summary-value">*</div>
+        </div>
+        <div class="summary-card">
+            <div class="summary-icon"><i class="fa fa-exchange-alt"></i></div>
+            <div class="summary-title">Movimientos hoy</div>
+            <div class="summary-value">*</div>
+        </div>
+        <div class="summary-card">
+            <div class="summary-icon"><i class="fa fa-exclamation-triangle text-warning"></i></div>
+            <div class="summary-title">Stock bajo</div>
+            <div class="summary-value">*</div>
+        </div>
+    </div>
+    <div class="dashboard-section">
+        <h4><i class="fa fa-box text-secondary"></i> Resumen de Inventario</h4>
+        <p class="text-muted">Visualiza el estado general del inventario, movimientos recientes y alertas importantes.</p>
+        <!-- Aquí puedes agregar tablas, gráficos o widgets de resumen -->
+    </div>
+    <div class="dashboard-section">
+        <h4><i class="fa fa-bell text-warning"></i> Notificaciones</h4>
+        <ul class="list-unstyled mb-0">
+            <li><i class="fa fa-exclamation-circle text-danger"></i> Medicamentos con stock bajo</li>
+            <li><i class="fa fa-calendar-check text-success"></i> Últimos movimientos registrados</li>
+        </ul>
+    </div>
+</div>
+
+<script>
+window.addEventListener('DOMContentLoaded', function() {
+    var msg = document.getElementById('dashboardSuccessToast');
+    if (msg) {
+        setTimeout(function() {
+            msg.style.opacity = '0';
+        }, 3200);
+        setTimeout(function() {
+            msg.style.display = 'none';
+        }, 3900);
+    }
+});
+</script>
