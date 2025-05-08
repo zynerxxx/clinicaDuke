@@ -1,4 +1,5 @@
 using System;
+using System.ComponentModel.DataAnnotations;
 
 namespace clinicaDukeDB.Models
 {
@@ -6,8 +7,14 @@ namespace clinicaDukeDB.Models
     {
         public int Id { get; set; }
         public string Nombre { get; set; } = string.Empty;
+
+        [Required]
+        [MaxLength(100)]
         public string UsuarioNombre { get; set; } = string.Empty;
+
+        [Required]
         public string ContrasenaHash { get; set; } = string.Empty;
+
         public string Correo { get; set; } = string.Empty;
         public string Telefono { get; set; } = string.Empty;
         public string Rol { get; set; } = "Usuario";

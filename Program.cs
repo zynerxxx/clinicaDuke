@@ -24,6 +24,8 @@ builder.Services.AddAuthentication(options =>
     options.Cookie.HttpOnly = true;
 });
 builder.Services.AddControllersWithViews();
+// Registrar el filtro personalizado para inyección de dependencias
+builder.Services.AddScoped<clinicaDukeDB.Filters.TempDataLoginRedirectFilter>();
 
 var app = builder.Build();
 

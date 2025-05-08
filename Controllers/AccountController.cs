@@ -17,17 +17,22 @@ namespace clinicaDukeDB.Controllers
         }
 
         [HttpGet]
-        public IActionResult Login()
+        public IActionResult Login([FromQuery] string? returnUrl)
         {
             if (TempData["LoginError"] != null)
             {
                 ViewBag.Error = TempData["LoginError"]?.ToString();
             }
+            else if (!(User.Identity?.IsAuthenticated ?? false) && !string.IsNullOrEmpty(returnUrl))
+            {
+                ViewBag.Error = "¡Inicia sesión primero!";
+            }
             return View();
         }
 
         [HttpPost]
-        public async Task<IActionResult> Login(string username, string password)
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Login([FromForm] string username, [FromForm] string password)
         {
             if (string.IsNullOrWhiteSpace(username) || string.IsNullOrWhiteSpace(password))
             {
