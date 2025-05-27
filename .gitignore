@@ -1,3 +1,36 @@
+# Visual Studio
+.vs/
+
+# Build results
+bin/
+obj/
+
+# User-specific files
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# Migrations (if you want to ignore generated SQL, but keep C# migration files)
+Migrations/*.sql
+
+# Others
+*.dbmdl
+*.dbproj.schemaview
+*.pdb
+*.cache
+*.log
+*.tlog
+*.vshost.*
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# Uncomment if you want to ignore local settings
+# appsettings.Development.json
+
+# Existing entries
 /.github
-/obj
-/bin
+/.fake
+/migrations

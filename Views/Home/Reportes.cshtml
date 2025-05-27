@@ -1,0 +1,1356 @@
+@model clinicaDukeDB.Models.ReportesViewModel
+@{
+    ViewData["Title"] = "Reportes";
+}
+
+@* --- Estilos ultra modernos para reportes, alineados al dashboard --- *@
+<style>
+    .reportes-title {
+        font-size: 2.1rem;
+        font-weight: 700;
+        color: #232323;
+        margin-bottom: 2.2rem;
+        letter-spacing: -1px;
+        display: flex;
+        align-items: center;
+        gap: 0.7rem;
+        animation: fadeInDown 0.7s cubic-bezier(.39,.58,.57,1) both;
+    }
+    .reportes-title .fa {
+        font-size: 2.1rem;
+        color: #f7b801;
+        opacity: 0.95;
+        filter: drop-shadow(0 2px 6px #ffe08280);
+        transition: transform 0.3s ease;
+        display: inline-block;
+    }
+    .reportes-title .fa:hover {
+        transform: scale(1.15) rotate(5deg);
+    }
+    .reporte-card {
+        border-radius: 1.7rem;
+        box-shadow: 0 4px 32px 0 rgba(80, 80, 180, 0.10);
+        background: #fff;
+        border: none;
+        margin-bottom: 0;
+        transition: box-shadow 0.3s, transform 0.2s;
+        animation: fadeInUp 0.7s cubic-bezier(.39,.58,.57,1) both;
+        padding: 0;
+    }
+    .reporte-card:hover {
+        box-shadow: 0 12px 40px 0 rgba(108,99,255,0.14);
+        transform: translateY(-6px) scale(1.018);
+    }
+    .reporte-card-header {
+        border-radius: 1.7rem 1.7rem 0 0;
+        font-size: 1.18rem;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        padding: 1.3rem 1.7rem 1.1rem 1.7rem;
+        background: transparent;
+        color: #232323;
+        border-bottom: none;
+        letter-spacing: -0.5px;
+    }
+    .reporte-card-header .icon-bg {
+        width: 2.7rem;
+        height: 2.7rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+        background: transparent;
+        box-shadow: none;
+        margin-right: 0.5rem;
+    }
+    .reporte-card-header .fa {
+        font-size: 1.5rem;
+        color: var(--icon-color);
+        transition: transform 0.3s ease;
+        display: inline-block;
+        filter: drop-shadow(0 2px 4px var(--icon-shadow));
+    }
+    .reporte-card-header .fa:hover {
+        transform: scale(1.15) rotate(5deg);
+    }
+    .reporte-card-header.stock {
+        --icon-bg1: #fff8e1;
+        --icon-bg2: #ffe082;
+        --icon-shadow: #ffe08240;
+        --icon-color: #f7b801;
+    }
+    .reporte-card-header.mov {
+        --icon-bg1: #e0f7fa;
+        --icon-bg2: #4fdaf7;
+        --icon-shadow: #4fdaf740;
+        --icon-color: #00bcd4;
+    }
+    .reporte-card-header.top {
+        --icon-bg1: #e3f0ff;
+        --icon-bg2: #2979ff;
+        --icon-shadow: #2979ff40;
+        --icon-color: #2979ff;
+        color: #2979ff;
+    }
+    .reporte-card-header.mov {
+        padding-bottom: 0;
+        margin-bottom: 0;
+    }
+    .reporte-card-body {
+        padding: 1.3rem 1.7rem 1.1rem 1.7rem;
+        background: transparent;
+        border-radius: 0 0 1.7rem 1.7rem;
+        min-height: 70px;
+        overflow-x: auto;
+        padding-top: 0.1rem;
+    }
+    .reporte-empty {
+        color: #bdbdbd;
+        font-size: 1.13rem;
+        display: flex;
+        align-items: center;
+        gap: 0.7rem;
+        margin: 0.7rem 0 0.2rem 0;
+        font-weight: 500;
+        letter-spacing: -0.2px;
+        animation: fadeIn 0.7s cubic-bezier(.39,.58,.57,1) both;
+    }
+    .reporte-empty .fa {
+        font-size: 1.5rem;
+        opacity: 0.7;
+        transition: transform 0.3s ease;
+        display: inline-block;
+    }
+    .reporte-empty .fa:hover {
+        transform: scale(1.15) rotate(5deg);
+    }
+    .table-sm th, .table-sm td {
+        vertical-align: middle;
+    }
+
+    @@keyframes fadeInUp {
+        0% { opacity: 0; transform: translateY(30px); }
+        100% { opacity: 1; transform: none; }
+    }
+    @@keyframes fadeInDown {
+        0% { opacity: 0; transform: translateY(-30px); }
+        100% { opacity: 1; transform: none; }
+    }
+    @@keyframes fadeIn {
+        0% { opacity: 0; }
+        100% { opacity: 1; }
+    }
+    @@keyframes spinBtn {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+    /* Animación loader central */
+    /* --- Botón flotante y loader minimalista --- */
+    #btn-limpiar-filtros {
+        display: none;
+        position: fixed;
+        top: 50%;
+        right: 32px;
+        z-index: 1000;
+        opacity: 0;
+        transition: opacity 0.4s;
+        filter: drop-shadow(0 2px 12px rgba(80,80,180,0.10));
+    }
+    #btn-limpiar-filtros.show {
+        display: block !important;
+        opacity: 1 !important;
+    }
+    #btn-limpiar-filtros .btn {
+        font-size: 1.05rem;
+        padding: 0.55rem 1.3rem 0.55rem 1.1rem;
+        border-radius: 2.2rem;
+        background: linear-gradient(90deg, #f0f4ff 60%, #d6e4ff 100%);
+        color: #1a237e;
+        border: none;
+        font-weight: 500;
+        letter-spacing: 0.01em;
+        box-shadow: 0 2px 12px 0 rgba(80, 80, 180, 0.10);
+        transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+        display: flex;
+        align-items: center;
+        gap: 0.7rem;
+        outline: none;
+        position: relative;
+        overflow: hidden;
+        transform: translateY(0);
+    }
+    #btn-limpiar-filtros .btn:hover {
+        background: linear-gradient(90deg, #d6e4ff 60%, #f0f4ff 100%);
+        color: #3949ab;
+        box-shadow: 0 6px 24px 0 rgba(57,73,171,0.13);
+        transform: translateY(-3px);
+    }
+    #btn-limpiar-filtros .btn:active {
+        transform: translateY(0);
+        box-shadow: 0 2px 10px 0 rgba(57,73,171,0.1);
+        transition: all 0.1s;
+    }
+    #btn-limpiar-filtros .btn::after {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 5px;
+        height: 5px;
+        background: rgba(255, 255, 255, 0.7);
+        opacity: 0;
+        border-radius: 100%;
+        transform: scale(1, 1) translate(-50%, -50%);
+        transform-origin: 50% 50%;
+    }
+    #btn-limpiar-filtros .btn:focus:not(:active)::after {
+        animation: ripple 0.8s ease-out;
+    }
+    @@keyframes ripple {
+        0% {
+            transform: scale(0, 0);
+            opacity: 0.5;
+        }
+        20% {
+            transform: scale(25, 25);
+            opacity: 0.3;
+        }
+        100% {
+            opacity: 0;
+            transform: scale(40, 40);
+        }
+    }
+    #btn-limpiar-filtros .fa-eraser {
+        color: #3949ab;
+        font-size: 1.25rem;
+        filter: drop-shadow(0 2px 6px #3949ab80);
+        margin-right: 0.2rem;
+        transition: transform 0.3s ease;
+        display: inline-block;
+    }
+
+    #btn-limpiar-filtros .fa-eraser:hover {
+        transform: scale(1.15) rotate(5deg);
+    }
+    #btn-limpiar-filtros .btn-text {
+        font-weight: 500;
+        font-size: 1.05rem;
+        letter-spacing: 0.01em;
+        transition: letter-spacing 0.3s ease;
+    }
+    #btn-limpiar-filtros .btn:hover .btn-text {
+        letter-spacing: 0.03em;
+    }
+
+    #loader-limpiar-filtros {
+        display: none;
+        position: fixed;
+        top: 0; left: 0; width: 100vw; height: 100vh;
+        z-index: 20000;
+        background: rgba(255,255,255,0.18);
+        backdrop-filter: blur(2.5px);
+        align-items: center;
+        justify-content: center;
+    }
+    #loader-limpiar-filtros .loader-box {
+        background: rgba(255,255,255,0.97);
+        border-radius: 1.2rem;
+        padding: 1.5rem 2.2rem;
+        box-shadow: 0 4px 32px 0 rgba(80,80,180,0.10);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.7rem;
+        min-width: 220px;
+    }
+    #loader-limpiar-filtros .loader-spinner {
+        width: 2.1rem;
+        height: 2.1rem;
+        border: 3px solid #cd82ff4d;
+        border-top: 3px solid #9501f794;
+        border-radius: 50%;
+        animation: spinBtn 0.7s linear infinite;
+        background: transparent;
+        margin-bottom: 0.5rem;
+    }
+    #loader-limpiar-filtros .loader-text {
+        color: #444;
+        font-size: 1.07rem;
+        font-weight: 500;
+        letter-spacing: 0.01em;
+        opacity: 0.85;
+    }
+
+    .btn .fa {
+        transition: transform 0.3s ease;
+        display: inline-block;
+    }
+    .btn .fa:hover {
+        transform: scale(1.15) rotate(5deg);
+    }
+
+
+    /* --- Modern, Responsive, and Readable Table Styles --- */
+    .reporte-card-body {
+        max-width: 100vw;
+        overflow-x: auto;
+        scrollbar-width: thin;
+        scrollbar-color: #e0e0e0 #fafbfc;
+    }
+    .reporte-card-body::-webkit-scrollbar {
+        height: 7px;
+        background: #fafbfc;
+        border-radius: 6px;
+    }
+    .reporte-card-body::-webkit-scrollbar-thumb {
+        background: #e0e0e0;
+        border-radius: 6px;
+    }
+    .reporte-card-body .table {
+        width: 100%;
+        table-layout: fixed;
+        border: none !important;
+        box-shadow: none;
+        border-top: none !important;
+        border-bottom: none !important;
+    }
+    .reporte-card-body .table th,
+    .reporte-card-body .table td {
+        border: none !important;
+        border-bottom: 1.5px solid #f3f3f3 !important;
+        background: #fff;
+    }
+    .reporte-card-body .table thead th {
+        background: #fff;
+        color: #232323;
+        font-weight: 800;
+        font-size: 1.13rem;
+        letter-spacing: 0.01em;
+        text-transform: none;
+        box-shadow: none;
+        text-align: left;
+        padding: 1.1rem 1.3rem;
+        border-radius: 0;
+        border-top: none !important;
+        border-bottom: 2.5px solid #e5e7ef !important;
+        position: sticky;
+        top: 0;
+        z-index: 2;
+        vertical-align: middle;
+        white-space: nowrap;
+    }
+    .reporte-card-body .table tbody tr:last-child td {
+        border-bottom: none !important;
+    }
+    .reporte-card-body .table th.acciones-col,
+    .reporte-card-body .table td.acciones-col {
+        width: 38px;
+        min-width: 38px;
+        max-width: 38px;
+        text-align: center;
+        position: sticky;
+        right: 0;
+        background: #fff;
+        z-index: 3;
+    }
+    .reporte-card-body .table tbody tr {
+        background: #fff;
+        transition: background 0.18s, border-left 0.18s;
+        border-left: 3px solid transparent;
+    }
+    .reporte-card-body .table tbody tr:hover {
+        background: #f7faff;
+        border-left: 3px solid #4fd1c5;
+    }
+    .reporte-card-body .table td {
+        padding: 1.05rem 1.3rem;
+        vertical-align: middle;
+        border: none;
+        border-top: 1px solid #f3f3f3;
+        background: transparent;
+        font-size: 1.06rem;
+        word-break: break-word;
+        white-space: normal;
+        line-height: 1.4;
+        text-overflow: ellipsis;
+        overflow: hidden;
+        max-width: 220px;
+    }
+    .reporte-card-body .table td.observaciones-col {
+        max-width: 110px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+    .reporte-card-body .table tbody tr:first-child td {
+        border-top: none;
+    }
+    .reporte-card-body .table.table-sm td,
+    .reporte-card-body .table.table-sm thead th {
+        padding: 0.7rem 0.8rem;
+    }
+    .reporte-card-body .table.table-bordered,
+    .reporte-card-body .table.table-bordered th,
+    .reporte-card-body .table.table-bordered td {
+        border: none !important;
+    }
+    .reporte-card-body .table.table-bordered thead th {
+        border-bottom: 2.5px solid #e5e7ef;
+    }
+    .reporte-card-body .table.table-bordered tbody td {
+        border-top: 1px solid #f3f3f3;
+    }
+    .reporte-card-body .table.table-bordered tbody tr:first-child td {
+        border-top: none;
+    }
+    .reporte-card-body .table td:focus {
+        outline: none;
+        background: #f0f4ff;
+    }
+    /* Badge para tipo */
+    .badge-tipo {
+        display: inline-block;
+        padding: 0.38em 1.25em;
+        border-radius: 1.5em;
+        font-size: 1.08em;
+        font-weight: 800;
+        letter-spacing: 0.02em;
+        color: #fff;
+        background: #38b2ac;
+        box-shadow: 0 2px 8px 0 rgba(56,178,172,0.10);
+        vertical-align: middle;
+        white-space: nowrap;
+        border: none;
+        transition: background 0.2s, transform 0.18s, box-shadow 0.18s;
+        cursor: default;
+        filter: drop-shadow(0 1px 4px rgba(56,178,172,0.10));
+    }
+    .badge-tipo.entrada {
+        background: linear-gradient(90deg, #38b2ac 70%, #4fd1c5 100%);
+        box-shadow: 0 2px 8px 0 rgba(56,178,172,0.13);
+    }
+    .badge-tipo.salida {
+        background: linear-gradient(90deg, #e53e3e 70%, #ff7675 100%);
+        box-shadow: 0 2px 8px 0 rgba(229,62,62,0.13);
+    }
+    .badge-tipo:hover {
+        transform: scale(1.08) translateY(-2px);
+        box-shadow: 0 6px 18px 0 rgba(56,178,172,0.18);
+        opacity: 0.95;
+    }
+    /* Responsive adjustments */
+    @@media (max-width: 900px) {
+        .reporte-card-body .table,
+        .reporte-card-body .table thead th,
+        .reporte-card-body .table td {
+            font-size: 0.98rem;
+        }
+        .reporte-card-body .table thead th,
+        .reporte-card-body .table td {
+            padding: 0.55rem 0.5rem;
+            max-width: 120px;
+        }
+    }
+    @@media (max-width: 700px) {
+        .reporte-card-body .table,
+        .reporte-card-body .table thead th,
+        .reporte-card-body .table td {
+            font-size: 0.90rem;
+        }
+        .reporte-card-body .table thead th,
+        .reporte-card-body .table td {
+            padding: 0.35rem 0.3rem;
+            max-width: 80px;
+        }
+    }
+
+    .table-responsive-x {
+        width: 100%;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    /* Estilo especial para la tabla de resumen por usuario */
+    .resumen-usuario-table {
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 0;
+        background: #fff;
+        font-size: 1.08rem;
+        box-shadow: none;
+    }
+    .resumen-usuario-table th {
+        background: #f7f7fd;
+        color: #232323;
+        font-weight: 800;
+        font-size: 1.13rem;
+        letter-spacing: 0.01em;
+        border: none;
+        border-bottom: 2.5px solid #e5e7ef;
+        padding: 1.05rem 1.3rem 0.85rem 1.3rem;
+        text-align: left;
+    }
+    .resumen-usuario-table td {
+        border: none;
+        border-bottom: 1.2px solid #ececec;
+        padding: 0.85rem 1.3rem;
+        background: #fff;
+        color: #232323;
+        vertical-align: middle;
+        font-size: 1.07rem;
+    }
+    .resumen-usuario-table tr:last-child td {
+        border-bottom: none;
+    }
+    .resumen-usuario-table thead tr th:first-child {
+        border-top-left-radius: 0.7rem;
+    }
+    .resumen-usuario-table thead tr th:last-child {
+        border-top-right-radius: 0.7rem;
+    }
+    .resumen-usuario-table tbody tr:last-child td:first-child {
+        border-bottom-left-radius: 0.7rem;
+    }
+    .resumen-usuario-table tbody tr:last-child td:last-child {
+        border-bottom-right-radius: 0.7rem;
+    }
+
+    .filtros-reportes {
+        background: #fff;
+        border-radius: 1.3rem;
+        box-shadow: 0 4px 32px 0 rgba(80,80,180,0.07);
+        padding: 1.3rem 2.2rem 1.1rem 2.2rem;
+        margin-bottom: 2.2rem;
+        border: none;
+    }
+    .filtros-reportes .form-label {
+        font-weight: 700;
+        color: #232323;
+        margin-bottom: 0.35rem;
+        font-size: 1.07rem;
+        letter-spacing: -0.5px;
+    }
+    .filtros-reportes .form-control, .filtros-reportes .form-select {
+        border-radius: 0.9rem;
+        border: 1.5px solid #e5e7ef;
+        font-size: 1.13rem;
+        padding: 0.85rem 1.2rem;
+        background: #fff;
+        box-shadow: none;
+        transition: border-color 0.18s;
+        color: #232323;
+        font-weight: 500;
+    }
+    .filtros-reportes .form-control:focus, .filtros-reportes .form-select:focus {
+        border-color: #2563eb;
+        box-shadow: 0 0 0 2px #2563eb22;
+        outline: none;
+    }
+    .filtros-reportes .row.g-3 {
+        margin-bottom: 0.1rem;
+        gap: 0.5rem 0;
+    }
+    .filtros-reportes .btn {
+        font-size: 1.09rem;
+        padding: 0.65rem 1.5rem 0.65rem 1.2rem;
+        border-radius: 0.9rem;
+        font-weight: 700;
+        letter-spacing: 0.01em;
+        box-shadow: none;
+        border: none;
+        display: flex;
+        align-items: center;
+        gap: 0.6rem;
+        transition: background 0.18s, color 0.18s, box-shadow 0.18s;
+    }
+    .filtros-reportes .btn-primary {
+        background: #2563eb;
+        color: #fff;
+    }
+    .filtros-reportes .btn-primary:hover {
+        background: #1d4ed8;
+        color: #fff;
+    }
+    .filtros-reportes .btn-outline-secondary {
+        border: 1.5px solid #e5e7ef;
+        color: #232323;
+        background: #fff;
+    }
+    .filtros-reportes .btn-outline-secondary:hover {
+        background: #f0f4ff;
+        color: #2563eb;
+        border-color: #2563eb;
+    }
+    .filtros-reportes .btn-success {
+        background: #16a34a;
+        color: #fff;
+    }
+    .filtros-reportes .btn-success:hover {
+        background: #15803d;
+        color: #fff;
+    }
+    .filtros-reportes .btn-danger {
+        background: #e53e3e;
+        color: #fff;
+    }
+    .filtros-reportes .btn-danger:hover {
+        background: #b91c1c;
+        color: #fff;
+    }
+    .filtros-reportes .btn i {
+        font-size: 1.18em;
+    }
+    .filtros-reportes .btn:active {
+        box-shadow: 0 2px 8px 0 #2563eb22;
+    }
+    .filtros-reportes .col-md-12.mt-2.d-flex {
+        margin-top: 1.1rem !important;
+        gap: 0.7rem !important;
+    }
+    .filtros-reportes .btn-success, .filtros-reportes .btn-danger {
+        min-width: 170px;
+        justify-content: center;
+    }
+    .filtros-reportes .btn-primary, .filtros-reportes .btn-outline-secondary {
+        min-width: 120px;
+        justify-content: center;
+    }
+    @@media (max-width: 1200px) {
+        .filtros-reportes {
+            padding: 1.1rem 1.1rem 1rem 1.1rem;
+        }
+    }
+    @@media (max-width: 900px) {
+        .filtros-reportes .form-control, .filtros-reportes .form-select {
+            font-size: 0.98rem;
+            padding: 0.5rem 0.7rem;
+        }
+        .filtros-reportes .btn {
+            font-size: 0.98rem;
+            padding: 0.45rem 1rem 0.45rem 0.9rem;
+        }
+    }
+    @@media (max-width: 700px) {
+        .filtros-reportes {
+            padding: 0.7rem 0.3rem 0.5rem 0.3rem;
+        }
+        .filtros-reportes .btn, .filtros-reportes .btn-success, .filtros-reportes .btn-danger {
+            min-width: unset;
+            width: 100%;
+            margin-bottom: 0.4rem;
+        }
+        .filtros-reportes .col-md-12.mt-2.d-flex {
+            flex-direction: column !important;
+            gap: 0.4rem !important;
+            margin-top: 0.7rem !important;
+        }
+    }
+
+    .btn-info-mov {
+        color: #fff;
+        border: none;
+        border-radius: 50%;
+        width: 2.1rem;
+        height: 2.1rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: background 0.18s, box-shadow 0.18s, transform 0.18s;
+        font-size: 1.13rem;
+        outline: none !important;
+        padding: 0;
+        position: relative;
+        user-select: none;
+    }
+    .btn-info-mov:focus-visible {
+        box-shadow: 0 0 0 2px #f7b801cc;
+        outline: none !important;
+        border: none !important;
+    }
+    .btn-info-mov:focus, .btn-info-mov:active {
+        background: linear-gradient(135deg, #ffe082 60%, #f7b801 100%);
+        color: #fff;
+        outline: none !important;
+        border: none !important;
+        transform: scale(1.06);
+    }
+    .btn-info-mov:hover {
+        color: #fff;
+        transform: scale(1.09);
+    }
+    .btn-info-mov .fa-info-circle {
+        font-size: 1.13rem;
+        color: #f7b801;
+        margin: 0;
+        filter: drop-shadow(0 2px 6px #ffe08280);
+        transition: color 0.2s, transform 0.2s;
+    }
+    .btn-info-mov:hover .fa-info-circle,
+    .btn-info-mov:focus .fa-info-circle {
+        color: #b28704;
+        transform: scale(1.13) rotate(7deg);
+    }
+
+    /* --- Estilo minimalista y elegante para el modal de historial completo en Reportes --- */
+    #historialCompletoModal .modal-content {
+        border-radius: 1.2rem;
+        box-shadow: 0 8px 32px 0 rgba(108,99,255,0.10);
+        border: none;
+        background: #fcfcfe;
+        padding: 0.2rem 0.2rem 0.7rem 0.2rem;
+    }
+    #historialCompletoModal .modal-header {
+        border-bottom: 1px solid #ecebfa;
+        background: linear-gradient(90deg, #f7f7fd 60%, #ecebfa 100%);
+        border-top-left-radius: 1.2rem;
+        border-top-right-radius: 1.2rem;
+        padding-top: 1.2rem;
+        padding-bottom: 1rem;
+    }
+    #historialCompletoModal .modal-title {
+        font-size: 1.25rem;
+        font-weight: 700;
+        color: #554ee0;
+        letter-spacing: -0.5px;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    #historialCompletoModal .btn-close {
+        background: #ecebfa;
+        border-radius: 50%;
+        opacity: 0.7;
+        transition: background 0.2s, opacity 0.2s;
+    }
+    #historialCompletoModal .btn-close:hover {
+        background: #e0e0f7;
+        opacity: 1;
+    }
+    #historialCompletoModal .table {
+        background: transparent;
+        border-radius: 0.8rem;
+        overflow: hidden;
+        box-shadow: 0 2px 12px 0 rgba(108,99,255,0.06);
+    }
+    #historialCompletoModal thead tr {
+        background: #f3f2fa;
+        border-bottom: 1px solid #ecebfa;
+    }
+    #historialCompletoModal th, #historialCompletoModal td {
+        border: none;
+        vertical-align: middle;
+        font-size: 1.01rem;
+        padding-top: 0.55rem;
+        padding-bottom: 0.55rem;
+    }
+    #historialCompletoModal th {
+        color: #6c63ff;
+        font-weight: 700;
+        letter-spacing: -0.5px;
+        background: #f7f7fd;
+    }
+    #historialCompletoModal td {
+        color: #222;
+        background: transparent;
+        font-weight: 500;
+    }
+    #historialCompletoModal tr {
+        transition: background 0.2s;
+    }
+    #historialCompletoModal tr:hover {
+        background: #ecebfa33;
+    }
+    #historialCompletoModal .badge {
+        border-radius: 1.2rem;
+        font-size: 0.97rem;
+        font-weight: 600;
+        padding: 0.32rem 0.9rem 0.32rem 0.7rem;
+        letter-spacing: -0.2px;
+        box-shadow: 0 1px 4px 0 rgba(108,99,255,0.07);
+        border: none;
+    }
+    #historialCompletoModal .badge.bg-success {
+        background: #eafaf3 !important;
+        color: #27ae60 !important;
+    }
+    #historialCompletoModal .badge.bg-danger {
+        background: #fff3f3 !important;
+        color: #e74c3c !important;
+    }
+    #historialCompletoModal .pagination {
+        background: #f7f7fd;
+        border-radius: 1.2rem;
+        box-shadow: 0 2px 12px 0 rgba(108,99,255,0.06);
+        padding: 0.25rem 0.7rem;
+        display: inline-flex;
+        gap: 0.15rem;
+        border: 1px solid #ecebfa;
+    }
+    #historialCompletoModal .pagination .page-item {
+        margin: 0 0.08rem;
+    }
+    #historialCompletoModal .pagination .page-link {
+        border: none;
+        background: transparent;
+        color: #554ee0;
+        font-weight: 500;
+        font-size: 1.08rem;
+        border-radius: 0.8rem !important;
+        transition: background 0.2s, color 0.2s, box-shadow 0.2s;
+        box-shadow: 0 1px 4px 0 rgba(108,99,255,0.07);
+    }
+    #historialCompletoModal .page-item.active .page-link,
+    #historialCompletoModal .page-item .page-link:focus,
+    #historialCompletoModal .page-item .page-link:hover {
+        background: #ecebfa !important;
+        color: #554ee0 !important;
+        box-shadow: 0 2px 8px 0 rgba(108,99,255,0.10);
+    }
+    #historialCompletoModal .page-item.disabled .page-link {
+        color: #bbb !important;
+        background: #f7f7fd !important;
+        opacity: 0.7;
+    }
+    #historialCompletoModal th .fa {
+        margin-right: 0.35rem;
+        color: #b3b3c9;
+        font-size: 1.08rem;
+        vertical-align: middle;
+        opacity: 0.85;
+    }
+    #historialCompletoModal td .fa {
+        margin-right: 0.18rem;
+        color: #b3b3c9;
+        font-size: 1.01rem;
+        vertical-align: middle;
+        opacity: 0.75;
+    }
+    #historialCompletoModal .modal-dialog {
+        animation: historialModalFadeSlideIn 0.45s cubic-bezier(0.4,0,0.2,1);
+    }
+    @@keyframes historialModalFadeSlideIn {
+        0% { opacity: 0; transform: translateY(40px) scale(0.98); }
+        100% { opacity: 1; transform: translateY(0) scale(1); }
+    }
+    #historialCompletoModal tbody tr {
+        opacity: 0;
+        transform: translateY(16px);
+        animation: historialRowFadeIn 0.6s cubic-bezier(0.4,0,0.2,1) forwards;
+        transition: background 0.2s, box-shadow 0.2s;
+    }
+    #historialCompletoModal tbody tr:hover {
+        background: #ecebfa55;
+        box-shadow: 0 2px 12px 0 rgba(108,99,255,0.10);
+        transition: background 0.2s, box-shadow 0.2s;
+    }
+    @@keyframes historialRowFadeIn {
+        0% { opacity: 0; transform: translateY(16px); }
+        100% { opacity: 1; transform: translateY(0); }
+    }
+</style>
+
+<h2 class="reportes-title" style="margin-top:2.5rem;">
+    <span class="icon-bg" style="--icon-bg1:#fff8e1;--icon-bg2:#ffe082;--icon-shadow:#ffe08240;--icon-color:#f7b801;width:2.7rem;height:2.7rem;margin-right:1rem;">
+        <i class="fa fa-chart-bar"></i>
+    </span>
+    Panel de Reportes
+</h2>
+<p style="margin-top:-1.2rem;margin-bottom:2.2rem;color:#888;font-size:1.08rem;animation:fadeIn 0.8s;">
+    Visualiza el estado y movimientos recientes de tu inventario.
+</p>
+
+<!-- Filtros avanzados -->
+<form method="post" asp-action="Reportes" class="mb-4 p-3 rounded shadow-sm filtros-reportes" id="form-filtros-reportes">
+    @Html.AntiForgeryToken()
+    <div class="row g-3 align-items-end">
+        <div class="col-md-3">
+            <label class="form-label">Fecha inicio</label>
+            <input type="text" name="FechaInicio" class="form-control filtro-fecha" placeholder="dd/mm/aaaa" value="@(Model.Filtros.FechaInicio?.ToString("dd/MM/yyyy") ?? "")" autocomplete="off">
+        </div>
+        <div class="col-md-3">
+            <label class="form-label">Fecha fin</label>
+            <input type="text" name="FechaFin" class="form-control filtro-fecha" placeholder="dd/mm/aaaa" value="@(Model.Filtros.FechaFin?.ToString("dd/MM/yyyy") ?? "")" autocomplete="off">
+        </div>
+        <div class="col-md-2">
+            <label class="form-label">Usuario</label>
+            <select name="Usuario" class="form-select">
+                <option value="">Todos</option>
+                @foreach (var u in Model.Filtros.UsuariosDisponibles)
+                {
+                    if (u == Model.Filtros.Usuario)
+                    {
+                        <option value="@u" selected>@u</option>
+                    }
+                    else
+                    {
+                        <option value="@u">@u</option>
+                    }
+                }
+            </select>
+        </div>
+        <div class="col-md-2">
+            <label class="form-label">Tipo movimiento</label>
+            <select name="TipoMovimiento" class="form-select">
+                <option value="">Todos</option>
+                @foreach (var t in Model.Filtros.TiposMovimientoDisponibles)
+                {
+                    if (t == Model.Filtros.TipoMovimiento)
+                    {
+                        <option value="@t" selected>@t</option>
+                    }
+                    else
+                    {
+                        <option value="@t">@t</option>
+                    }
+                }
+            </select>
+        </div>
+        <div class="col-md-2">
+            <label class="form-label">Producto</label>
+            <select name="Producto" class="form-select">
+                <option value="">Todos</option>
+                @foreach (var p in Model.Filtros.ProductosDisponibles)
+                {
+                    if (p.Id.ToString() == Model.Filtros.Producto)
+                    {
+                        <option value="@p.Id" selected>@p.Nombre</option>
+                    }
+                    else
+                    {
+                        <option value="@p.Id">@p.Nombre</option>
+                    }
+                }
+            </select>
+        </div>
+    </div>
+</form>
+
+<div class="row g-4">
+    <div class="col-md-6">
+        <!-- Resumen por usuario -->
+        <div class="reporte-card mb-4">
+            <div class="reporte-card-header mov">
+                <span class="icon-bg"><i class="fa fa-users"></i></span> Resumen por usuario
+            </div>
+            <div class="reporte-card-body">
+                @if (Model.ResumenPorUsuario.Any())
+                {
+                    <table class="table table-sm resumen-usuario-table">
+                        <thead>
+                            <tr>
+                                <th>Usuario</th>
+                                <th>Total movimientos</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        @foreach (var r in Model.ResumenPorUsuario)
+                        {
+                            <tr>
+                                <td>@r.Usuario</td>
+                                <td>@r.TotalMovimientos</td>
+                            </tr>
+                        }
+                        </tbody>
+                    </table>
+                }
+                else
+                {
+                    <span class="reporte-empty"><i class="fa fa-info-circle"></i> No hay datos de resumen por usuario.</span>
+                }
+            </div>
+        </div>
+<!-- Productos con stock bajo -->
+        <div class="reporte-card">
+            <div class="reporte-card-header stock">
+                <span class="icon-bg"><i class="fa fa-box"></i></span> Productos con stock bajo
+            </div>
+            <div class="reporte-card-body">
+                @if (Model.ProductosStockBajo.Any())
+                {
+                    <table class="table table-sm table-bordered">
+                        <thead>
+                            <tr>
+                                <th>Producto</th>
+                                <th>Cantidad actual</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        @foreach (var p in Model.ProductosStockBajo)
+                        {
+                            <tr>
+                                <td>@p.Nombre</td>
+                                <td>@p.CantidadActual</td>
+                            </tr>
+                        }
+                        </tbody>
+                    </table>
+                }
+                else
+                {
+                    <span class="reporte-empty"><i class="fa fa-info-circle"></i> No hay productos con stock bajo.</span>
+                }
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-6">
+        <div class="reporte-card">
+            <div class="reporte-card-header mov">
+                <span class="icon-bg"><i class="fa fa-exchange-alt"></i></span> Movimientos recientes
+            </div>
+            <div class="reporte-card-body">
+                @if (Model.MovimientosRecientes.Any())
+                {
+                    <div class="table-responsive-x">
+                        <table class="table table-sm">
+                            <thead>
+                                <tr>
+                                    <th style="width: 120px;">Producto</th>
+                                    <th style="width: 80px;">Tipo</th>
+                                    <th style="width: 70px;">Cantidad</th>
+                                    <th style="width: 70px;">Fecha</th>
+                                    <th class="acciones-col"></th>
+                                </tr>
+                            </thead>
+                            <body>
+                            @for (int i = 0; i < Model.MovimientosRecientes.Count; i++)
+                            {
+                                var m = Model.MovimientosRecientes[i];
+                                <tr>
+                                    <td>@m.Producto</td>
+                                    <td>
+                                        @if (m.Tipo.Trim().ToLower() == "entrada") {
+                                            <span style="color:#38b2ac;font-weight:700;display:flex;align-items:center;gap:0.4em;">
+                                                <i class="fa fa-arrow-down" style="font-size:1em;"></i> Entrada
+                                            </span>
+                                        } else if (m.Tipo.Trim().ToLower() == "salida") {
+                                            <span style="color:#e53e3e;font-weight:700;display:flex;align-items:center;gap:0.4em;">
+                                                <i class="fa fa-arrow-up" style="font-size:1em;"></i> Salida
+                                            </span>
+                                        } else {
+                                            <span style="color:#888;font-weight:700;display:flex;align-items:center;gap:0.4em;">
+                                                <i class="fa fa-exchange-alt" style="font-size:1em;"></i> @m.Tipo
+                                            </span>
+                                        }
+                                    </td>
+                                    <td style="text-align:right;">@m.Cantidad</td>
+                                    <td>
+                                        <span data-bs-toggle="tooltip" data-bs-placement="top" title="@m.Fecha">
+                                            @if (!string.IsNullOrEmpty(m.Fecha) && m.Fecha.Contains(" ")) {
+                                                var partes = m.Fecha.Split(' ');
+                                                @(DateTime.TryParse(partes[0], out var d) ? d.ToString("dd/MM") : partes[0])
+                                            } else {
+                                                @m.Fecha
+                                            }
+                                        </span>
+                                    </td>
+                                    <td class="acciones-col">
+                                        <button type="button" class="btn btn-info-mov" data-bs-toggle="modal" data-bs-target="#detalleMovimientoModal" onclick="mostrarDetalleMovimiento('@Html.Raw(System.Text.Encodings.Web.JavaScriptEncoder.Default.Encode(m.Producto))','@Html.Raw(System.Text.Encodings.Web.JavaScriptEncoder.Default.Encode(m.Tipo))','@m.Cantidad','@m.Fecha','@Html.Raw(System.Text.Encodings.Web.JavaScriptEncoder.Default.Encode(m.Usuario))','@Html.Raw(System.Text.Encodings.Web.JavaScriptEncoder.Default.Encode(m.Observaciones))')">
+                                            <i class="fa fa-info-circle"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                            }
+                            </body>
+                        </table>
+                    </div>
+                }
+                else
+                {
+                    <span class="reporte-empty"><i class="fa fa-history"></i> No hay movimientos recientes.</span>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Gráficas de pastel -->
+<div class="row g-4 mb-4 mt-4">
+    <div class="col-md-6">
+        <div class="reporte-card">
+            <div class="reporte-card-header top">
+                <span class="icon-bg"><i class="fa fa-chart-pie"></i></span> Movimientos por usuario
+            </div>
+            <div class="reporte-card-body">
+                <canvas id="graficaPorUsuario" data-chart='@Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.GraficaPorUsuario))'></canvas>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="reporte-card">
+            <div class="reporte-card-header top">
+                <span class="icon-bg"><i class="fa fa-chart-pie"></i></span> Movimientos por tipo
+            </div>
+            <div class="reporte-card-body">
+                <canvas id="graficaPorTipo" data-chart='@Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.GraficaPorTipo))'></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Botón flotante de limpiar filtros (asegurado al final del body, antes de scripts) -->
+<div id="btn-limpiar-filtros" style="display:none;position:fixed;top:50%;right:32px;z-index:1000;">
+    <button type="button" class="btn" onclick="animarLimpiarFiltros(this)">
+        <i class="fa fa-eraser"></i> <span class="btn-text">Limpiar filtros</span>
+    </button>
+</div>
+
+<div id="loader-limpiar-filtros" style="display:none;position:fixed;top:0;left:0;width:100vw;height:100vh;z-index:20000;">
+    <div class="loader-box">
+        <div class="loader-spinner"></div>
+        <div class="loader-text">Limpiando filtros...</div>
+    </div>
+</div>
+
+<!-- Modal Detalle Movimiento -->
+<div class="modal fade" id="detalleMovimientoModal" tabindex="-1" aria-labelledby="detalleMovimientoLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="detalleMovimientoLabel">Detalle de Movimiento</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+      </div>
+      <div class="modal-body">
+        <dl class="row mb-0">
+          <dt class="col-sm-4">Producto</dt>
+          <dd class="col-sm-8" id="detalleProducto"></dd>
+          <dt class="col-sm-4">Tipo</dt>
+          <dd class="col-sm-8" id="detalleTipo"></dd>
+          <dt class="col-sm-4">Cantidad</dt>
+          <dd class="col-sm-8" id="detalleCantidad"></dd>
+          <dt class="col-sm-4">Fecha</dt>
+          <dd class="col-sm-8" id="detalleFecha"></dd>
+          <dt class="col-sm-4">Usuario</dt>
+          <dd class="col-sm-8" id="detalleUsuario"></dd>
+          <dt class="col-sm-4">Observaciones</dt>
+          <dd class="col-sm-8" id="detalleObservaciones"></dd>
+        </dl>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal para historial completo de movimientos (sin filtros) -->
+<div class="modal fade" id="historialCompletoModal" tabindex="-1" aria-labelledby="historialCompletoModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-xl">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="historialCompletoModalLabel"><i class="fa fa-history"></i> Historial completo de movimientos</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+      </div>
+      <div class="modal-body">
+        <div class="table-responsive mb-3">
+          <table class="table table-hover table-bordered align-middle mb-0">
+            <thead>
+              <tr>
+                <th><i class="fa fa-capsules"></i> Producto</th>
+                <th><i class="fa fa-exchange-alt"></i> Tipo</th>
+                <th><i class="fa fa-sort-numeric-up"></i> Cantidad</th>
+                <th><i class="fa fa-calendar-alt"></i> Fecha</th>
+                <th><i class="fa fa-user"></i> Usuario</th>
+                <th><i class="fa fa-comment-dots"></i> Observaciones</th>
+              </tr>
+            </thead>
+            <tbody id="historialCompletoBody">
+              <tr>
+                <td colspan="6" class="text-center">Cargando...</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <nav>
+          <ul class="pagination justify-content-center" id="historialPagination"></ul>
+        </nav>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Botón flotante para abrir historial completo -->
+<button type="button" class="btn btn-primary" style="position:fixed;bottom:2.5rem;right:2.5rem;z-index:1200;box-shadow:0 2px 12px 0 rgba(80,80,180,0.13);border-radius:50%;width:3.2rem;height:3.2rem;display:flex;align-items:center;justify-content:center;font-size:1.5rem;" id="abrirHistorialCompletoBtn" title="Ver historial completo">
+    <i class="fa fa-history"></i>
+</button>
+
+@section Scripts {
+    <!-- Flatpickr CSS & JS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/es.js"></script>
+    <script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // Inicializar flatpickr solo si existen los inputs
+        var dateInputs = document.querySelectorAll('.filtro-fecha');
+        if (dateInputs.length > 0) {
+            flatpickr('.filtro-fecha', {
+                dateFormat: 'd/m/Y',
+                locale: 'es',
+                allowInput: true,
+                maxDate: 'today',
+                onReady: function(selectedDates, dateStr, instance) {
+                    if (!instance.calendarContainer.querySelector('.flatpickr-clear-btn')) {
+                        var clearBtn = document.createElement('button');
+                        clearBtn.type = 'button';
+                        clearBtn.textContent = 'Borrar';
+                        clearBtn.className = 'flatpickr-clear-btn btn btn-sm btn-outline-secondary';
+                        clearBtn.style.margin = '8px 8px 0 0';
+                        clearBtn.style.float = 'right';
+                        clearBtn.style.display = instance.input.value ? 'inline-block' : 'none';
+                        clearBtn.onclick = function(e) {
+                            e.preventDefault();
+                            instance.clear();
+                            instance.close();
+                        };
+                        instance.calendarContainer.appendChild(clearBtn);
+                        instance.input.addEventListener('input', function() {
+                            clearBtn.style.display = instance.input.value ? 'inline-block' : 'none';
+                        });
+                    }
+                },
+                onChange: function(selectedDates, dateStr, instance) {
+                    var clearBtn = instance.calendarContainer.querySelector('.flatpickr-clear-btn');
+                    if (clearBtn) {
+                        clearBtn.style.display = dateStr ? 'inline-block' : 'none';
+                    }
+                    if (typeof window.ajaxFiltrar === 'function') window.ajaxFiltrar();
+                },
+                onValueUpdate: function(selectedDates, dateStr, instance) {
+                    var clearBtn = instance.calendarContainer.querySelector('.flatpickr-clear-btn');
+                    if (clearBtn) {
+                        clearBtn.style.display = dateStr ? 'inline-block' : 'none';
+                    }
+                }
+            });
+        }
+        var form = document.getElementById('form-filtros-reportes');
+        // AJAX submit para filtros
+        function ajaxFiltrar() {
+            var loader = document.getElementById('loader-limpiar-filtros');
+            if(loader) loader.style.display = 'flex';
+            var formData = new FormData(form);
+            var xhr = new XMLHttpRequest();
+            xhr.open('POST', form.action, true);
+            xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
+            xhr.onreadystatechange = function() {
+                if (xhr.readyState === 4) {
+                    if(loader) loader.style.display = 'none';
+                    if (xhr.status === 200) {
+                        var tempDiv = document.createElement('div');
+                        tempDiv.innerHTML = xhr.responseText;
+                        var newContent = tempDiv.querySelector('.row.g-4');
+                        var oldContent = document.querySelector('.row.g-4');
+                        if (newContent && oldContent) {
+                            oldContent.parentNode.replaceChild(newContent, oldContent);
+                            // Reinicializar flatpickr en los nuevos inputs tras AJAX
+                            var dateInputs = document.querySelectorAll('.filtro-fecha');
+                            if (dateInputs.length > 0) {
+                                flatpickr('.filtro-fecha', {
+                                    dateFormat: 'd/m/Y',
+                                    locale: 'es',
+                                    allowInput: true,
+                                    maxDate: 'today',
+                                    onReady: function(selectedDates, dateStr, instance) {
+                                        if (!instance.calendarContainer.querySelector('.flatpickr-clear-btn')) {
+                                            var clearBtn = document.createElement('button');
+                                            clearBtn.type = 'button';
+                                            clearBtn.textContent = 'Borrar';
+                                            clearBtn.className = 'flatpickr-clear-btn btn btn-sm btn-outline-secondary';
+                                            clearBtn.style.margin = '8px 8px 0 0';
+                                            clearBtn.style.float = 'right';
+                                            clearBtn.style.display = instance.input.value ? 'inline-block' : 'none';
+                                            clearBtn.onclick = function(e) {
+                                                e.preventDefault();
+                                                instance.clear();
+                                                instance.close();
+                                            };
+                                            instance.calendarContainer.appendChild(clearBtn);
+                                            instance.input.addEventListener('input', function() {
+                                                clearBtn.style.display = instance.input.value ? 'inline-block' : 'none';
+                                            });
+                                        }
+                                    },
+                                    onChange: function(selectedDates, dateStr, instance) {
+                                        var clearBtn = instance.calendarContainer.querySelector('.flatpickr-clear-btn');
+                                        if (clearBtn) {
+                                            clearBtn.style.display = dateStr ? 'inline-block' : 'none';
+                                        }
+                                        if (typeof window.ajaxFiltrar === 'function') window.ajaxFiltrar();
+                                    },
+                                    onValueUpdate: function(selectedDates, dateStr, instance) {
+                                        var clearBtn = instance.calendarContainer.querySelector('.flatpickr-clear-btn');
+                                        if (clearBtn) {
+                                            clearBtn.style.display = dateStr ? 'inline-block' : 'none';
+                                        }
+                                    }
+                                });
+                            }
+                        }
+                        var newCharts = tempDiv.querySelectorAll('canvas');
+                        if (newCharts.length) {
+                            document.getElementById('graficaPorUsuario').replaceWith(newCharts[0].cloneNode(true));
+                            document.getElementById('graficaPorTipo').replaceWith(newCharts[1].cloneNode(true));
+                            if (window.initReportesCharts) window.initReportesCharts();
+                        }
+                    }
+                }
+            };
+            xhr.send(formData);
+        }
+        // Hacer global para flatpickr
+        window.ajaxFiltrar = ajaxFiltrar;
+        // Autosubmit solo para selects
+        var selects = form.querySelectorAll('select');
+        selects.forEach(function(select) {
+            select.addEventListener('change', function() {
+                ajaxFiltrar();
+            });
+        });
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+            ajaxFiltrar();
+        });
+        var btnFiltrar = document.querySelector('button[type="submit"].btn-primary');
+        if(btnFiltrar) btnFiltrar.style.display = 'none';
+    });
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
+    <script src="~/js/reportes.charts.js"></script>
+    <script src="~/js/reportes.filtros.js"></script>
+    <script src="~/js/dashboard.historial.js"></script>
+    <script src="/js/reportes.historial.js"></script>
+    <script>
+    // Permitir abrir el modal desde el botón flotante
+    $(document).ready(function(){
+        $('#abrirHistorialCompletoBtn').on('click', function(){
+            // Abre el modal directamente
+            var modal = new bootstrap.Modal(document.getElementById('historialCompletoModal'));
+            modal.show();
+            // Carga la primera página del historial detallado
+            if (typeof cargarHistorialCompletoAdmin === 'function') cargarHistorialCompletoAdmin(1);
+        });
+    });
+    </script>
+    <script>
+$(document).ready(function () {
+    // Al hacer click en el botón de filtrar del modal, recarga el historial con los filtros
+    $('#btnFiltrarHistorialModal').on('click', function () {
+        const idProducto = $('#productoSeleccionado').val();
+        const fechaInicio = $('#fechaInicioHistorial').val();
+        const fechaFin = $('#fechaFinHistorial').val();
+        if (idProducto) {
+            window.cargarHistorialCompletoAdmin(1, idProducto, fechaInicio, fechaFin);
+        } else {
+            $('#historialCompletoBody').html('<tr><td colspan="6" class="text-center">Seleccione un producto para ver el historial.</td></tr>');
+            $('#historialPagination').empty();
+        }
+    });
+    // Al abrir el modal, limpia la tabla y espera selección
+    $('#historialCompletoModal').on('show.bs.modal', function () {
+        $('#historialCompletoBody').html('<tr><td colspan="6" class="text-center">Seleccione un producto y/o rango de fechas para ver el historial.</td></tr>');
+        $('#historialPagination').empty();
+    });
+});
+</script>
+}

@@ -12,50 +12,106 @@
 </head>
 <body>
     <header>
-        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
+        <nav class="navbar navbar-expand-lg navbar-light bg-gradient-primary fixed-top shadow-sm py-2" style="background: linear-gradient(90deg, #6c63ff 0%, #554ee0 100%);">
             <div class="container-fluid">
-                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">Clinica Duke</a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
-                        aria-expanded="false" aria-label="Toggle navigation">
+                <a class="navbar-brand d-flex align-items-center gap-2 text-white fw-bold" asp-area="" asp-controller="Home" asp-action="Index" style="font-size:1.25rem;">
+                    <i class="fa fa-clinic-medical fa-lg"></i> Clinica Duke
+                </a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNavbar" aria-controls="mainNavbar" aria-expanded="false" aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon"></span>
                 </button>
-                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
-                    <ul class="navbar-nav flex-grow-1">
+                <div class="collapse navbar-collapse" id="mainNavbar">
+                    <ul class="navbar-nav me-auto mb-2 mb-lg-0 gap-1">
                         <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
+                            <a class="nav-link text-white d-flex align-items-center gap-1" asp-area="" asp-controller="Home" asp-action="Index">
+                                <i class="fa fa-home"></i> Inicio
+                            </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+                            <a class="nav-link text-white d-flex align-items-center gap-1" asp-area="" asp-controller="Home" asp-action="Dashboard">
+                                <i class="fa fa-tachometer-alt"></i> Dashboard
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-white d-flex align-items-center gap-1" asp-area="" asp-controller="Home" asp-action="Privacy">
+                                <i class="fa fa-shield-alt"></i> Privacidad
+                            </a>
                         </li>
                     </ul>
-                    <ul class="navbar-nav ms-auto">
-                        @{
-                            var userName = User.Identity != null && User.Identity.IsAuthenticated
-                                ? (User.Identity.Name ?? "Usuario")
-                                : "Usuario";
+                    <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
+                        @if (User.Identity != null && User.Identity.IsAuthenticated)
+                        {
+                            <li class="nav-item position-relative d-flex align-items-center me-2" id="navbarNotifMinimal">
+                                <div class="dropdown">
+                                    <button class="notif-bell-btn d-flex align-items-center justify-content-center rounded-circle position-relative@( (ViewBag.ProductosStockBajo > 0 || ViewBag.MovimientosHoy > 0 || ViewBag.ProductosProximosAVencer > 0) ? " notif-bell-animate" : "")" id="notifDropdownBtn" data-bs-toggle="dropdown" aria-expanded="false" type="button">
+                                        <i class="fa fa-bell notif-bell-icon@( (ViewBag.ProductosStockBajo > 0 || ViewBag.MovimientosHoy > 0 || ViewBag.ProductosProximosAVencer > 0) ? " notif-alert" : "")" style="font-size:1.35rem;"></i>
+                                        <span class="notif-dot@( (ViewBag.ProductosStockBajo > 0 || ViewBag.MovimientosHoy > 0 || ViewBag.ProductosProximosAVencer > 0) ? " show" : "")" id="notifBadge"></span>
+                                    </button>
+                                    <ul class="dropdown-menu dropdown-menu-end shadow border-0 mt-2 notif-dropdown-animate" aria-labelledby="notifDropdownBtn" id="notifDropdownMenu" style="border-radius:1rem;min-width:260px;">
+                                        <li class="px-3 pt-2 pb-1">
+                                            <div class="fw-bold text-primary" style="font-size:1.08rem;">Notificaciones</div>
+                                        </li>
+                                        <li><hr class="dropdown-divider"></li>
+                                        @if(ViewBag.ProductosStockBajo > 0)
+                                        {
+                                            <li class="px-3 py-2 d-flex align-items-center gap-2">
+                                                <i class="fa fa-exclamation-circle text-danger"></i>
+                                                <span>Hay productos con <b>stock bajo</b>.</span>
+                                            </li>
+                                        }
+                                        @if(ViewBag.ProductosProximosAVencer > 0)
+                                        {
+                                            <li class="px-3 py-2 d-flex align-items-center gap-2">
+                                                <i class="fa fa-exclamation-triangle text-warning"></i>
+                                                <span>Hay productos <b>próximos a vencer</b>.</span>
+                                            </li>
+                                        }
+                                        @if((ViewBag.ProductosStockBajo ?? 0) == 0 && (ViewBag.MovimientosHoy ?? 0) == 0 && (ViewBag.ProductosProximosAVencer ?? 0) == 0)
+                                        {
+                                            <li class="px-3 py-2 text-muted small">Sin notificaciones importantes.</li>
+                                        }
+                                    </ul>
+                                </div>
+                            </li>
                         }
                         @if (User.Identity != null && User.Identity.IsAuthenticated)
                         {
+                            var userDisplayName = User.Claims.FirstOrDefault(c => c.Type == "name")?.Value ?? User.Identity.Name ?? "Usuario";
+                            var userRole = User.Claims.FirstOrDefault(c => c.Type == System.Security.Claims.ClaimTypes.Role)?.Value ?? "Usuario";
+                            var initial = !string.IsNullOrEmpty(userDisplayName) ? userDisplayName.Substring(0,1).ToUpper() : "U";
                             <li class="nav-item dropdown">
-                                <a class="nav-link dropdown-toggle d-flex align-items-center px-3 py-2 rounded-pill bg-light shadow-sm" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false" style="gap:0.5rem; min-width: 160px; transition:box-shadow 0.2s, background 0.2s;">
-                                    <span class="me-1"><i class="fa fa-user-circle fa-lg text-primary"></i></span>
-                                    <span class="fw-semibold" style="color:#444;">@userName</span>
-                                </a>
-                                <ul class="dropdown-menu dropdown-menu-end shadow border-0 user-dropdown-animate" aria-labelledby="userDropdown" style="border-radius:1rem; min-width:180px;">
-                                    <li>
-                                        <form id="logoutForm" asp-controller="Account" asp-action="Logout" method="post" class="d-inline">
-                                            <button type="submit" class="dropdown-item logout-btn-elegant bg-light rounded-pill shadow-sm d-flex align-items-center gap-2 px-3 py-2 w-100" style="color: #c0392b; font-weight: 600; transition:background 0.2s, color 0.2s;">
-                                                <i class="fa fa-sign-out-alt"></i> <span class="fw-semibold">Cerrar sesión</span>
-                                            </button>
-                                        </form>
-                                    </li>
-                                </ul>
+                                <div class="dropdown">
+                                    <button class="btn btn-light d-flex align-items-center gap-2 rounded-pill px-3 py-2 shadow-sm user-menu-btn" type="button" id="customUserMenu" data-bs-toggle="dropdown" aria-expanded="false" style="min-width:170px;">
+                                        <span class="avatar-circle bg-primary text-white fw-bold d-flex align-items-center justify-content-center me-1">@initial</span>
+                                        <span class="fw-semibold user-name-text">@userDisplayName</span>
+                                        <i class="fa fa-chevron-down ms-1 text-secondary user-chevron"></i>
+                                    </button>
+                                    <ul class="dropdown-menu dropdown-menu-end shadow border-0 mt-2 user-dropdown-animate" aria-labelledby="customUserMenu" style="border-radius:1rem;min-width:200px;">
+                                        <li class="px-3 pt-2 pb-1">
+                                            <div class="fw-bold user-dropdown-name">@userDisplayName</div>
+                                            <div class="text-muted user-dropdown-role">@userRole</div>
+                                        </li>
+                                        <li><hr class="dropdown-divider"></li>
+                                        <li>
+                                            <a class="dropdown-item d-flex align-items-center gap-2 user-dropdown-item" href="#" style="font-size:1.05rem;">
+                                                <i class="fa fa-user"></i> Perfil
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <form id="logoutForm" asp-controller="Account" asp-action="Logout" method="post" class="d-inline">
+                                                <button type="submit" class="dropdown-item d-flex align-items-center gap-2 text-danger fw-semibold user-dropdown-item" style="font-size:1.05rem;">
+                                                    <i class="fa fa-sign-out-alt"></i> Cerrar sesión
+                                                </button>
+                                            </form>
+                                        </li>
+                                    </ul>
+                                </div>
                             </li>
                         }
-                        else
+                        @if (!(User.Identity?.IsAuthenticated ?? false) && !(ViewContext.RouteData.Values["controller"]?.ToString() == "Account" && ViewContext.RouteData.Values["action"]?.ToString() == "Login") && !(ViewContext.RouteData.Values["controller"]?.ToString() == "Home" && ViewContext.RouteData.Values["action"]?.ToString() == "Index"))
                         {
                             <li class="nav-item">
-                                <a class="nav-link text-dark px-3 py-2 rounded-pill bg-light shadow-sm d-flex align-items-center gap-2" asp-area="" asp-controller="Account" asp-action="Login" style="transition:background 0.2s;">
+                                <a class="nav-link login-btn-animate d-flex align-items-center gap-2" asp-area="" asp-controller="Account" asp-action="Login">
                                     <i class="fa fa-sign-in-alt"></i> <span class="fw-semibold">Iniciar sesión</span>
                                 </a>
                             </li>
@@ -69,96 +125,159 @@
         <main role="main" class="pb-3">
             @RenderBody()
         </main>
-    </div>
-
-    <footer class="border-top footer text-muted">
-        <div class="container">
-            &copy; 2025 - clinicaDuke - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
-        </div>
-    </footer>
-    <script src="~/lib/jquery/dist/jquery.min.js"></script>
-    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    </div>    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
     @await RenderSectionAsync("Scripts", required: false)
     <style>
-        .user-dropdown-animate {
-            animation: dropdownFadeIn 0.35s cubic-bezier(0.4,0,0.2,1);
-            transform-origin: top right;
-            text-align: center;
+        .bg-gradient-primary {
+            background: linear-gradient(90deg, #6c63ff 0%, #554ee0 100%) !important;
         }
-        @@keyframes dropdownFadeIn {
-            0% { opacity: 0; transform: scale(0.96) translateY(-10px); }
-            100% { opacity: 1; transform: scale(1) translateY(0); }
+        .navbar {
+            transition: box-shadow 0.3s, background 0.3s;
         }
-        .logout-btn-elegant {
-            background: transparent !important;
-            color: #c0392b !important;
+        .navbar-brand, .navbar-nav .nav-link, .navbar-nav .nav-link:focus {
+            color: #fff !important;
+            font-weight: 500;
+            letter-spacing: -0.5px;
+            transition: color 0.2s;
+        }
+        .navbar-nav .nav-link:hover, .navbar-nav .nav-link.active {
+            color: #fff !important;
+            background: rgba(255,255,255,0.08) !important;
+            border-radius: 1.2rem;
+        }
+        .navbar .form-control {
+            border-radius: 2rem;
             border: none;
-            font-weight: 600;
-            box-shadow: none !important;
-            font-size: 1.05rem;
-            padding: 0.55rem 1.2rem !important;
-            min-width: unset !important;
-            display: flex;
+            box-shadow: 0 2px 8px 0 rgba(108,99,255,0.06);
+            font-size: 0.98rem;
+        }
+        .navbar .btn-outline-light {
+            border-radius: 2rem;
+            border: none;
+            color: #fff;
+            background: #6c63ff;
+            transition: background 0.2s, color 0.2s;
+        }
+        .navbar .btn-outline-light:hover {
+            background: #554ee0;
+            color: #ffe082;
+        }
+        .navbar .dropdown-menu {
+            background: #fff !important;
+            box-shadow: 0 6px 24px 0 rgba(108,99,255,0.13) !important;
+            border-radius: 1.1rem !important;
+            border: 1px solid #ecebfa !important;
+            padding: 0.2rem 0.5rem 0.5rem 0.5rem !important;
+        }
+        .avatar-circle {
+            display: inline-flex;
             align-items: center;
             justify-content: center;
-            gap: 0.5rem;
-            width: 100%;
-            min-width: 0 !important;
-            border-radius: 2rem !important;
-            transition: color 0.2s;
-            cursor: pointer;
-            pointer-events: auto;
+            font-size: 1.1rem;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #6c63ff 60%, #554ee0 100%);
+            color: #fff;
+            box-shadow: 0 2px 8px 0 rgba(108,99,255,0.13);
+            transition: box-shadow 0.3s, background 0.3s;
         }
-        .logout-btn-elegant:hover, .logout-btn-elegant:focus {
-            background: transparent !important;
-            color: #a93226 !important;
-            box-shadow: none !important;
-        }
-        .navbar-nav .dropdown-menu {
+        .user-menu-btn {
+            transition: box-shadow 0.25s, background 0.25s, color 0.25s;
+            box-shadow: 0 2px 8px 0 rgba(108,99,255,0.06);
             background: #f7f7fd !important;
-            box-shadow: 0 2px 8px 0 rgba(108,99,255,0.06) !important;
-            border-radius: 2rem !important;
-            min-width: 0;
-            width: auto;
-            padding: 0.35rem 0.7rem;
-            margin: 0;
-            border: none;
-            text-align: center;
-            transition: background 0.2s, box-shadow 0.2s;
         }
-        .navbar-nav .dropdown-menu:hover,
-        .navbar-nav .dropdown-menu:focus-within {
+        .user-menu-btn:hover, .user-menu-btn:focus {
             background: #ecebfa !important;
-            box-shadow: 0 4px 16px 0 rgba(108,99,255,0.13) !important;
+            box-shadow: 0 4px 16px 0 rgba(108,99,255,0.13);
+            color: #554ee0;
         }
-        .navbar-nav .dropdown-menu:hover .logout-btn-elegant,
-        .navbar-nav .dropdown-menu:focus-within .logout-btn-elegant {
-            background: transparent !important;
-            color: #a93226 !important;
+        .user-name-text {
+            font-size: 1.08rem;
+            letter-spacing: -0.5px;
+            transition: color 0.2s;
         }
-        .navbar-nav .dropdown-item {
+        .user-chevron {
+            transition: transform 0.3s cubic-bezier(0.4,0,0.2,1);
+        }
+        .user-menu-btn[aria-expanded="true"] .user-chevron {
+            transform: rotate(180deg);
+        }
+        .user-dropdown-animate {
+            animation: fadeSlideIn 0.25s cubic-bezier(0.4,0,0.2,1);
+            transform-origin: top right;
+            background: #fff !important;
+            box-shadow: 0 6px 24px 0 rgba(108,99,255,0.13) !important;
+            border-radius: 1.1rem !important;
+            min-width: 180px;
+            padding: 0.7rem 0.5rem 0.5rem 0.5rem;
+            margin-top: 0.3rem !important;
+            border: 1px solid #ecebfa;
+        }
+        @@keyframes fadeSlideIn {
+            0% { opacity: 0; transform: translateY(-10px) scale(0.98); }
+            100% { opacity: 1; transform: translateY(0) scale(1); }
+        }
+        .user-dropdown-item {
             border-radius: 1.2rem;
             font-size: 0.98rem;
             font-weight: 500;
             padding: 0.35rem 0.9rem;
-            transition: background 0.2s, color 0.2s;
+            transition: background 0.2s, color 0.2s, box-shadow 0.2s;
+            text-align: left;
         }
-        .navbar-nav .dropdown-item:active, .navbar-nav .dropdown-item:focus, .navbar-nav .dropdown-item:hover {
-            background: #f3f2fd00;
-            color: #554ee0;
-        }
-        .navbar-nav .nav-link.bg-light {
-            background: #f7f7fd !important;
-            box-shadow: 0 2px 8px 0 rgba(108,99,255,0.06);
-            border-radius: 2rem;
-            font-size: 1.05rem;
-            font-weight: 500;
-            transition: background 0.2s, box-shadow 0.2s;
-        }
-        .navbar-nav .nav-link.bg-light:hover {
+        .user-dropdown-item:active, .user-dropdown-item:focus, .user-dropdown-item:hover {
             background: #ecebfa !important;
+            color: #554ee0 !important;
+            box-shadow: 0 2px 8px 0 rgba(108,99,255,0.10);
+        }
+        .user-dropdown-name {
+            font-size: 1.08rem;
+            font-weight: 600;
+            color: #222;
+            letter-spacing: -0.5px;
+            margin-bottom: 0.1rem;
+        }
+        .user-dropdown-role {
+            font-size: 0.97rem;
+            color: #888;
+            margin-bottom: 0.2rem;
+        }
+        .login-btn-animate {
+            background: transparent !important;
+            color: #fff !important;
+            border: 2px solid #fff;
+            border-radius: 2rem;
+            font-weight: 600;
+            transition: background 0.25s, color 0.25s, box-shadow 0.25s, border 0.25s;
+            box-shadow: 0 2px 8px 0 rgba(108,99,255,0.06);
+        }
+        .login-btn-animate:hover, .login-btn-animate:focus {
+            background: rgba(255,255,255,0.13) !important;
+            color: #fff !important;
+            border: 2px solid #fff;
             box-shadow: 0 4px 16px 0 rgba(108,99,255,0.13);
+            filter: none !important;
+            text-shadow: none !important;
+        }
+        .login-btn-animate i {
+            color: #fff !important;
+            transition: color 0.2s;
+        }
+        .login-btn-animate:hover i, .login-btn-animate:focus i {
+            color: #fff !important;
+        }
+        body{
+            padding-top: 3.5vh;
+        }
+
+        .navbar.bg-gradient-primary{
+            background: rgba(107, 99, 255, 0.863) !important; /* Color base con transparencia */
+            backdrop-filter: blur(8px); /* Difumina el fondo detrás de la navbar */
+            -webkit-backdrop-filter: blur(8px);
+            box-shadow: 0 2px 16px 0 rgba(80,80,180,0.10);
         }
     </style>
 </body>

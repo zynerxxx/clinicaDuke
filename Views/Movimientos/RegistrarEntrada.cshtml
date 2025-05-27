@@ -1,0 +1,244 @@
+@{
+    ViewData["Title"] = "Registrar Entrada";
+    var productosJson = System.Text.Json.JsonSerializer.Serialize(ViewBag.Productos);
+}
+<div class="container mt-4 fade-in-dashboard" style="max-width: 1100px;">
+    <div class="row g-4">
+        <div class="col-md-7">
+            <div class="card shadow-sm border-0">
+                <div class="card-body p-4">
+                    <h2 class="mb-4 text-center" style="font-weight:700; letter-spacing:-1px; color:#3a3a3a;">Registrar Entrada</h2>
+
+                    @if (TempData["Success"] != null)
+                    {
+                        <div class="alert alert-success d-flex align-items-center gap-2 animate__animated animate__fadeInDown" role="alert">
+                            <i class="fa fa-check-circle"></i> @TempData["Success"]
+                        </div>
+                    }
+                    @if (TempData["Error"] != null)
+                    {
+                        <div class="alert alert-danger d-flex align-items-center gap-2 animate__animated animate__shakeX" role="alert">
+                            <i class="fa fa-exclamation-circle"></i> @TempData["Error"]
+                        </div>
+                    }
+                    @if (!ViewData.ModelState.IsValid)
+                    {
+                        <div class="alert alert-danger animate__animated animate__shakeX" role="alert">
+                            @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+                            {
+                                <div>@error.ErrorMessage</div>
+                            }
+                        </div>
+                    }
+
+                    <form asp-action="RegistrarEntrada" method="post" autocomplete="off" id="entradaForm">
+                        <div class="mb-3">
+                            <label for="productoId" class="form-label fw-semibold">Producto</label>
+                            <select id="productoId" name="productoId" class="form-select interactive-field" required>
+                                <option value="">Seleccione un producto</option>
+                                @foreach (var producto in ViewBag.Productos)
+                                {
+                                    <option value="@producto.Id">@producto.Nombre</option>
+                                }
+                            </select>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="cantidad" class="form-label fw-semibold">Cantidad</label>
+                            <input type="number" id="cantidad" name="cantidad" class="form-control interactive-field" required min="1" placeholder="Ingrese la cantidad">
+                            <div class="form-text" id="cantidadFeedback"></div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="observaciones" class="form-label fw-semibold">Observaciones</label>
+                            <textarea id="observaciones" name="observaciones" class="form-control interactive-field" rows="2" placeholder="Ingrese una observación (mínimo 5 caracteres)" required minlength="5"></textarea>
+                            <div class="form-text" id="observacionesFeedback"></div>
+                        </div>
+
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-success btn-lg shadow-sm animate__animated animate__pulse animate__delay-1s" id="submitBtn">
+                                <i class="fa fa-plus-circle me-2"></i>Registrar Entrada
+                            </button>
+                        </div>
+                    </form>
+
+                    <script id="productosStockJson" type="application/json">@Html.Raw(productosJson)</script>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-5">
+            <div class="card shadow-sm border-0 h-100" style="background: linear-gradient(135deg, #f8fafc 60%, #43e97b 100%); border-radius: 1.5rem;">
+                <div class="card-body p-4 d-flex flex-column justify-content-center align-items-center">
+                    <h5 class="mb-4" style="font-weight:700; color:#444; letter-spacing:-0.5px; font-size:1.3rem;">
+                        <i class="fa fa-box-open me-2 text-success"></i>Detalle del Producto Seleccionado
+                    </h5>
+                    <table class="table table-borderless table-hover text-center mb-0" style="max-width:350px; background:rgba(255,255,255,0.95); border-radius:1rem; box-shadow:0 2px 12px 0 rgba(67,233,123,0.07);">
+                        <tbody>
+                            <tr style="font-size:1.08rem;">
+                                <th class="text-secondary" style="width:50%; font-weight:600;">Producto</th>
+                                <td id="detalleNombre">-</td>
+                            </tr>
+                            <tr style="font-size:1.08rem;">
+                                <th class="text-secondary" style="font-weight:600;">Stock actual</th>
+                                <td id="detalleStock">- <span id="detalleCantidadModificada" class="ms-2"></span></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" />
+<style>
+    .card {
+        border-radius: 1.2rem;
+        background: #fff;
+        box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.08);
+        animation: fadeInMove 1.2s cubic-bezier(0.4,0,0.2,1) 0.1s forwards;
+    }
+    .form-label {
+        color: #444;
+    }
+    .form-control, .form-select {
+        border-radius: 0.7rem;
+        font-size: 1.08rem;
+        transition: box-shadow 0.2s, border-color 0.2s;
+    }
+    .form-control:focus, .form-select:focus {
+        box-shadow: 0 0 0 2px #6c63ff33;
+        border-color: #6c63ff;
+    }
+    .btn-success {
+        background: linear-gradient(90deg, #6c63ff 0%, #43e97b 100%);
+        border: none;
+        font-weight: 600;
+        letter-spacing: 0.5px;
+        transition: background 0.2s, transform 0.2s;
+    }
+    .btn-success:hover {
+        background: linear-gradient(90deg, #43e97b 0%, #6c63ff 100%);
+        transform: scale(1.03);
+    }
+    .alert {
+        border-radius: 0.7rem;
+        font-size: 1.05rem;
+        margin-bottom: 1.2rem;
+    }
+    .fade-in-dashboard {
+        opacity: 0;
+        transform: translateY(20px) scale(0.98);
+        animation: fadeInMove 1.2s cubic-bezier(0.4,0,0.2,1) 0.1s forwards;
+    }
+    @@keyframes fadeInMove {
+        to {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+        }
+    }
+    .interactive-field:focus {
+        background: #f4f7ff;
+        transition: background 0.2s;
+    }
+    .interactive-field:invalid {
+        border-color: #ff5858;
+        animation: shakeX 0.4s;
+    }
+    .interactive-field:valid {
+        border-color: #43e97b;
+    }
+    #submitBtn:active {
+        transform: scale(0.98);
+    }
+    .table-borderless th, .table-borderless td {
+        border: none !important;
+    }
+    .table-hover tbody tr:hover {
+        background: #f7fff7 !important;
+        transition: background 0.2s;
+    }
+    #detalleStock {
+        transition: color 0.3s, font-size 0.3s;
+    }
+    #detalleStock:not(:empty):not(:contains('-')) {
+        font-weight: 700;
+        color: #43e97b;
+    }
+</style>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const productos = JSON.parse(document.getElementById('productosStockJson').textContent);
+        const productoSelect = document.getElementById('productoId');
+        const cantidadInput = document.getElementById('cantidad'); // Obtener input de cantidad
+        const detalleNombre = document.getElementById('detalleNombre');
+        const detalleStock = document.getElementById('detalleStock');
+        const detalleCantidadModificada = document.getElementById('detalleCantidadModificada'); // Obtener span para N+
+
+        function actualizarDetalleProducto() {
+            const prodId = productoSelect.value;
+            const prod = productos.find(p => p.Id == prodId);
+            const cantidadIngresada = parseInt(cantidadInput.value) || 0;
+
+            if (prod) {
+                detalleNombre.textContent = prod.Nombre;
+                detalleStock.firstChild.textContent = prod.CantidadActual; // Actualizar solo el número de stock
+                
+                if (cantidadIngresada > 0) {
+                    detalleCantidadModificada.textContent = `+${cantidadIngresada}`;
+                    detalleCantidadModificada.style.color = '#28a745'; // Verde
+                    detalleCantidadModificada.style.fontWeight = 'bold';
+                } else {
+                    detalleCantidadModificada.textContent = '';
+                }
+            } else {
+                detalleNombre.textContent = '-';
+                detalleStock.firstChild.textContent = '-';
+                detalleCantidadModificada.textContent = '';
+            }
+        }
+
+        productoSelect.addEventListener('change', function() {
+            cantidadInput.value = ''; // Limpiar cantidad al cambiar producto
+            actualizarDetalleProducto();
+        });
+        cantidadInput.addEventListener('input', actualizarDetalleProducto); // Actualizar al escribir cantidad
+        
+        actualizarDetalleProducto(); // Llamada inicial
+    });
+
+    document.addEventListener('DOMContentLoaded', function () {
+        const cantidadInput = document.getElementById('cantidad');
+        const feedback = document.getElementById('cantidadFeedback');
+        cantidadInput.addEventListener('input', function () {
+            if (cantidadInput.value <= 0) {
+                feedback.textContent = 'La cantidad debe ser mayor a cero.';
+                feedback.style.color = '#ff5858';
+            } else {
+                feedback.textContent = 'Cantidad válida.';
+                feedback.style.color = '#43e97b';
+            }
+        });
+        // Animación al enviar
+        document.getElementById('entradaForm').addEventListener('submit', function () {
+            document.getElementById('submitBtn').classList.add('animate__tada');
+        });
+    });
+
+    document.addEventListener('DOMContentLoaded', function () {
+        const observacionesInput = document.getElementById('observaciones');
+        const observacionesFeedback = document.getElementById('observacionesFeedback');
+        observacionesInput.addEventListener('input', function () {
+            if (observacionesInput.value.trim().length < 5) {
+                observacionesFeedback.textContent = 'La observación es obligatoria y debe tener al menos 5 caracteres.';
+                observacionesFeedback.style.color = '#ff5858';
+                observacionesInput.classList.add('is-invalid');
+            } else {
+                observacionesFeedback.textContent = 'Observación válida.';
+                observacionesFeedback.style.color = '#43e97b';
+                observacionesInput.classList.remove('is-invalid');
+            }
+        });
+    });
+</script>

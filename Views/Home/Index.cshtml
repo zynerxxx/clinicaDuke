@@ -164,9 +164,12 @@
                         </div>
                     </div>
                     <div class="text-center mt-4">
-                        <a class="btn btn-elegant btn-elegant-primary me-2" asp-controller="Account" asp-action="Login" style="outline: none; box-shadow: 0 4px 24px 0 rgba(108,99,255,0.13); border: none; background: #6c63ff; color: #fff; transition: background 0.2s, color 0.2s, box-shadow 0.2s;">
-                            <i class="fa fa-sign-in-alt"></i> Iniciar sesión
-                        </a>
+                        @if (!(User.Identity != null && User.Identity.IsAuthenticated))
+                        {
+                            <a class="btn btn-elegant btn-elegant-primary me-2" asp-controller="Account" asp-action="Login" style="outline: none; box-shadow: 0 4px 24px 0 rgba(108,99,255,0.13); border: none; background: #6c63ff; color: #fff; transition: background 0.2s, color 0.2s, box-shadow 0.2s;">
+                                <i class="fa fa-sign-in-alt"></i> Iniciar sesión
+                            </a>
+                        }
                         <a class="btn btn-elegant btn-elegant-outline ms-2" asp-controller="Home" asp-action="Privacy">
                             <i class="fa fa-info-circle"></i> Más información
                         </a>

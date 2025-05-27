@@ -1,3 +1,7 @@
+@using System.Text.Json;
+
+@model clinicaDukeDB.Models.DashboardViewModel
+
 @{
     ViewData["Title"] = "Dashboard";
 }
@@ -6,6 +10,20 @@
 {
     <div class="dashboard-toast-success" id="dashboardSuccessToast">
         <i class="fa fa-check-circle me-2"></i>@TempData["Success"]
+    </div>
+}
+
+@if (TempData["LoginError"] != null)
+{
+    <div class="dashboard-toast-success dashboard-toast-error" id="dashboardErrorToast" style="background:#fff3f3; color:#c0392b; border:1px solid #ffd6db; box-shadow:0 2px 8px 0 rgba(192,57,43,0.06); font-weight:500;">
+        <i class="fa fa-exclamation-circle me-2"></i>@TempData["LoginError"]
+    </div>
+}
+
+@if (TempData["Error"] != null)
+{
+    <div class="dashboard-toast-error" id="dashboardErrorToast">
+        <i class="fa fa-exclamation-circle me-2"></i>@TempData["Error"]
     </div>
 }
 
@@ -80,33 +98,69 @@
         flex-wrap: wrap;
     }
     .summary-card {
-        background: #f7f7fd;
-        border-radius: 1rem;
-        box-shadow: 0 2px 8px 0 rgba(108,99,255,0.06);
-        padding: 1.2rem 2rem;
-        min-width: 180px;
+        background: linear-gradient(135deg, #f7f7fd 60%, #ecebfa 100%);
+        border-radius: 1.2rem;
+        box-shadow: 0 4px 24px 0 rgba(108,99,255,0.10);
+        padding: 2.1rem 2.2rem 1.3rem 2.2rem;
+        min-width: 210px;
         text-align: center;
-        transition: box-shadow 0.3s, background 0.3s;
+        transition: box-shadow 0.4s, background 0.4s, transform 0.4s;
+        position: relative;
+        overflow: hidden;
+        opacity: 0;
+        transform: translateY(30px) scale(0.98);
+        animation: kpiFadeIn 1.1s cubic-bezier(0.4,0,0.2,1) forwards;
     }
+    .summary-card:nth-child(1) { animation-delay: 0.1s; }
+    .summary-card:nth-child(2) { animation-delay: 0.25s; }
+    .summary-card:nth-child(3) { animation-delay: 0.4s; }
     .summary-card:hover {
-        background: #ecebfa;
-        box-shadow: 0 4px 16px 0 rgba(108,99,255,0.13);
+        background: linear-gradient(135deg, #ecebfa 60%, #f7f7fd 100%);
+        box-shadow: 0 8px 32px 0 rgba(108,99,255,0.18);
+        transform: translateY(-6px) scale(1.03);
+    }
+    @@keyframes kpiFadeIn {
+        to {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+        }
     }
     .summary-icon {
-        font-size: 1.7rem;
-        color: #6c63ff;
-        margin-bottom: 0.3rem;
-        opacity: 0.9;
+        font-size: 2.8rem;
+        margin-bottom: 0.7rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 64px;
+        height: 64px;
+        border-radius: 50%;
+        margin-left: auto;
+        margin-right: auto;
+        box-shadow: 0 2px 12px 0 rgba(108,99,255,0.10);
+        background: #fff;
+        position: relative;
+        z-index: 1;
+        transition: box-shadow 0.3s, background 0.3s;
     }
+    .summary-card:nth-child(1) .summary-icon { color: #6c63ff; background: #ecebfa; }
+    .summary-card:nth-child(2) .summary-icon { color: #27ae60; background: #eafaf3; }
+    .summary-card:nth-child(3) .summary-icon { color: #e67e22; background: #fff7e6; }
     .summary-title {
-        font-size: 1.05rem;
-        color: #555;
+        font-size: 1.13rem;
+        color: #6c63ff;
         margin-bottom: 0.1rem;
+        font-weight: 600;
+        letter-spacing: -0.5px;
     }
     .summary-value {
-        font-size: 1.35rem;
-        font-weight: 700;
+        font-size: 2.1rem;
+        font-weight: 800;
         color: #222;
+        letter-spacing: -1px;
+        margin-bottom: 0.1rem;
+        margin-top: 0.1rem;
+        text-shadow: 0 2px 8px 0 rgba(108,99,255,0.07);
+        transition: color 0.3s;
     }
     .dashboard-toast-success {
         position: fixed;
@@ -138,53 +192,1515 @@
         from { opacity: 1; }
         to { opacity: 0; pointer-events: none; }
     }
+    .dashboard-toast-error {
+        position: fixed;
+        top: 2.2rem;
+        left: 50%;
+        transform: translateX(-50%);
+        z-index: 1055;
+        border-radius: 0.7rem;
+        font-size: 0.98rem;
+        padding: 0.65rem 1.1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        max-width: 350px;
+        justify-content: center;
+        opacity: 1;
+        transition: opacity 0.7s;
+        animation: fadeIn 0.7s;
+    }
+    .dashboard-toast-error.hide {
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.7s;
+    }
+    .dashboard-toast-error .fa-exclamation-circle {
+        font-size: 1.1em;
+        color: #c0392b;
+        opacity: 0.8;
+    }
+    .dashboard-movimientos-table tbody tr {
+        transition: background 0.3s, box-shadow 0.3s;
+    }
+    .dashboard-movimientos-table tbody tr.table-danger {
+        background: #fff3f3 !important;
+    }
+    .dashboard-movimientos-table tbody tr.table-success {
+        background: #f3fff7 !important;
+    }
+    .ver-historial-btn {
+        box-shadow: 0 2px 8px 0 rgba(108,99,255,0.08);
+        transition: box-shadow 0.2s, background 0.2s;
+    }
+    .ver-historial-btn:hover, .ver-historial-btn:focus {
+        background: #6b63ff00;
+        color: #6c63ff;
+        box-shadow: 0 4px 16px 0 rgba(108,99,255,0.13);
+    }
+    .dashboard-movimientos-elegant {
+        font-size: 1.01rem;
+        border-radius: 1.1rem;
+        overflow: hidden;
+        background: #f7f7fd;
+        box-shadow: 0 2px 12px 0 rgba(108,99,255,0.06);
+        margin-bottom: 0;
+    }
+    .dashboard-movimientos-elegant thead tr {
+        background: #f3f2fa;
+        border-bottom: 1px solid #ecebfa;
+    }
+    .dashboard-movimientos-elegant th {
+        color: #6c63ff;
+        font-weight: 600;
+        border: none;
+        padding-top: 0.7rem;
+        padding-bottom: 0.7rem;
+        letter-spacing: -0.5px;
+    }
+    .dashboard-movimientos-elegant td {
+        border: none;
+        background: transparent;
+        vertical-align: middle;
+        padding-top: 0.55rem;
+        padding-bottom: 0.55rem;
+    }
+    .mov-elegant-icon {
+        color: #b3b3c9;
+        margin-right: 0.5rem;
+        font-size: 1.1rem;
+        vertical-align: middle;
+    }
+    .mov-elegant-product {
+        font-weight: 500;
+        color: #222;
+        letter-spacing: -0.2px;
+    }
+    .mov-elegant-badge {
+        border-radius: 1.2rem;
+        font-size: 0.97rem;
+        font-weight: 600;
+        padding: 0.32rem 0.9rem 0.32rem 0.7rem;
+        box-shadow: 0 1px 4px 0 rgba(108,99,255,0.07);
+        letter-spacing: -0.2px;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+    }
+    .mov-elegant-badge-entrada {
+        background: #eafaf3;
+        color: #27ae60;
+        border: 1px solid #baf7d0;
+    }
+    .mov-elegant-badge-salida {
+        background: #fff3f3;
+        color: #e74c3c;
+        border: 1px solid #f7baba;
+    }
+    .mov-elegant-cantidad {
+        font-weight: 600;
+        font-size: 1.04rem;
+    }
+    .mov-elegant-fecha {
+        color: #888;
+        font-size: 0.98rem;
+        letter-spacing: -0.2px;
+    }
+    .dashboard-movimientos-elegant tbody tr {
+        transition: background 0.3s, box-shadow 0.3s;
+        border-radius: 0.7rem;
+    }
+    .dashboard-movimientos-elegant tbody tr:hover {
+        background: #ecebfa44;
+        box-shadow: 0 2px 8px 0 rgba(108,99,255,0.07);
+    }
+    .mov-th {
+        border-bottom: 2px solid #ecebfa !important;
+        background: #f7f7fd;
+        font-weight: 700;
+        color: #6c63ff;
+        letter-spacing: -0.5px;
+        font-size: 1.07rem;
+        padding-bottom: 0.6rem;
+    }
+    .mov-row {
+        transition: box-shadow 0.2s, background 0.2s;
+        border-bottom: 1px solid transparent;
+    }
+    .mov-row:hover, .mov-row:focus {
+        background: #f3f2fd !important;
+        box-shadow: 0 2px 12px 0 rgba(108,99,255,0.07);
+        border-bottom: 1.5px solid #ecebfa;
+    }
+    .mov-row:not(:last-child) {
+        border-bottom: 1px solid #f3f2fd;
+    }
+    .mov-badge-icon {
+        transition: transform 0.2s cubic-bezier(0.4,0,0.2,1);
+        display: inline-block;
+    }
+    .mov-elegant-badge:hover .mov-badge-icon {
+        transform: rotate(-15deg) scale(1.1);
+    }
+    .dashboard-alert-section {
+        margin-bottom: 2.2rem;
+    }
+    .dashboard-alert-card {
+        background: rgba(255,255,255,0.7);
+        border: none;
+        box-shadow: none;
+        font-size: 1.08rem;
+        border-radius: 0.9rem;
+        display: flex;
+        align-items: center;
+        gap: 1.1rem;
+        padding: 1.1rem 1.3rem;
+        margin-bottom: 0.7rem;
+        color: #222;
+    }
+    .dashboard-alert-card .fa-exclamation-triangle,
+    .dashboard-alert-card .fa-exclamation-circle {
+        font-size: 2.1rem;
+        opacity: 0.85;
+        margin-right: 0.2rem;
+    }
+    .dashboard-alert-card .fa-exclamation-triangle {
+        color: #f1c40f;
+    }
+    .dashboard-alert-card .fa-exclamation-circle {
+        color: #e74c3c;
+    }
+    .dashboard-alert-card .fw-bold {
+        font-size: 1.08rem;
+        margin-bottom: 0.1rem;
+    }
+    .dashboard-alert-card .text-muted {
+        font-size: 0.99rem;
+        color: #888 !important;
+    }
+    .dashboard-alert-card.alert-danger {
+        background: rgba(255,0,0,0.06);
+        color: #e74c3c;
+    }
+    .dashboard-alert-card.alert-warning {
+        background: rgba(255,193,7,0.09);
+        color: #f1c40f;
+    }
+    .dashboard-toast-fixed-notif {
+        position: fixed;
+        top: 5rem;
+        right: 1.5rem;
+        z-index: 1055;
+        background: linear-gradient(120deg, #fffbe6 80%, #f7f7fd 100%);
+        color: #353030;
+        border-radius: 0.8rem;
+        border: none;
+        font-size: 0.98rem;
+        font-weight: 500;
+        padding: 1rem 1.5rem 1rem 1.2rem;
+        box-shadow: 0 4px 18px 0 rgba(255,193,7,0.13);
+        min-width: 220px;
+        max-width: 260px;
+        display: flex;
+        flex-direction: column;
+        gap: 0.4rem;
+        align-items: flex-start;
+        opacity: 1;
+        transition: opacity 0.7s cubic-bezier(0.4,0,0.2,1);
+        animation: fadeInNotif 1.1s cubic-bezier(0.4,0,0.2,1);
+    }
+    .dashboard-toast-fixed-notif.hide {
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.7s cubic-bezier(0.4,0,0.2,1);
+    }
+    @@keyframes fadeInNotif {
+        from { opacity: 0; transform: translateY(20px) scale(0.98); }
+        to { opacity: 1; transform: translateY(0) scale(1); }
+    }
+    .dashboard-toast-fixed-notif .close-toast-btn {
+        position: absolute;
+        top: 0.4rem;
+        right: 0.7rem;
+        background: none;
+        border: none;
+        color: #b3a800;
+        font-size: 1.2rem;
+        cursor: pointer;
+        opacity: 0.7;
+        transition: opacity 0.2s;
+        z-index: 2;
+    }
+    .dashboard-toast-fixed-notif .close-toast-btn:hover {
+        opacity: 1;
+        color: #e67e22;
+    }
+    .dashboard-toast-fixed-notif ul {
+        padding-left: 1.1rem;
+        margin-bottom: 0;
+    }
+    .dashboard-toast-fixed-notif li {
+        margin-bottom: 0.2rem;
+        font-size: 0.98rem;
+        color: #444;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    .dashboard-toast-fixed-notif li .fa {
+        font-size: 1.1rem;
+    }
+    .dashboard-sidebar {
+        position: fixed;
+        top: 5.5rem;
+        left: 0;
+        width: 120px;
+        height: calc(100vh - 5.5rem);
+        background: rgba(255,255,255,0.65);
+        box-shadow: none;
+        border-top-right-radius: 1.2rem;
+        border-bottom-right-radius: 1.2rem;
+        padding: 1.2rem 0.3rem 1.2rem 0.3rem;
+        display: flex;
+        flex-direction: column;
+        gap: 0.7rem;
+        z-index: 1040;
+        align-items: stretch;
+        border-left: none;
+        transition: background 0.3s;
+        backdrop-filter: blur(8px);
+    }
+    .dashboard-sidebar .sidebar-btn {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-size: 1.01rem;
+        font-weight: 500;
+        border-radius: 0.6rem;
+        padding: 0.55rem 0.5rem;
+        margin-bottom: 0.05rem;
+        transition: background 0.18s, color 0.18s, box-shadow 0.18s, border 0.18s;
+        text-decoration: none;
+        border: none;
+        background: transparent;
+        box-shadow: none;
+        justify-content: flex-start;
+        opacity: 0.92;
+    }
+    .dashboard-sidebar .sidebar-btn i {
+        font-size: 1.08rem;
+        opacity: 0.8;
+    }
+    .dashboard-sidebar .sidebar-btn.btn-success {
+        color: #27ae60;
+    }
+    .dashboard-sidebar .sidebar-btn.btn-success:hover {
+        background: #eafaf3;
+        color: #219150;
+    }
+    .dashboard-sidebar .sidebar-btn.btn-danger {
+        color: #e74c3c;
+    }
+    .dashboard-sidebar .sidebar-btn.btn-danger:hover {
+        background: #fff3f3;
+        color: #c0392b;
+    }
+    .dashboard-sidebar .sidebar-btn.btn-primary {
+        color: #554ee0;
+    }
+    .dashboard-sidebar .sidebar-btn.btn-primary:hover {
+        background: #ecebfa;
+        color: #3d38b2;
+    }
+    .dashboard-sidebar .sidebar-btn.btn-warning {
+        color: #e67e22;
+    }
+    .dashboard-sidebar .sidebar-btn.btn-warning:hover {
+        background: #fffbe6;
+        color: #b36b00;
+    }
+    .dashboard-main-layout {
+        display: flex;
+        flex-direction: row;
+        align-items: flex-start;
+        width: 100%;
+        min-height: 100vh;
+    }
+    .container.fade-in-dashboard {
+        margin-left: 0;
+        flex: 1 1 0;
+        max-width: 100%;
+    }
+    @@media (max-width: 991px) {
+        .dashboard-sidebar {
+            position: static;
+            width: 100%;
+            height: auto;
+            flex-direction: row;
+            border-radius: 0 0 1.2rem 1.2rem;
+            padding: 1rem 0.5rem;
+            gap: 0.5rem;
+            box-shadow: none;
+            margin-bottom: 1.2rem;
+        }
+        .dashboard-sidebar .sidebar-btn {
+            flex: 1 1 0;
+            justify-content: center;
+            margin-bottom: 0;
+        }
+        .dashboard-main-layout {
+            flex-direction: column;
+        }
+        .container.fade-in-dashboard {
+            margin-left: 0;
+            max-width: 100%;
+        }
+    }
+
+    /* Centrado vertical más natural para el modal */
+    .modal-dialog {
+        /* Elimina margin-top para dejar que Bootstrap centre el modal */
+    }
+    body.modal-open {
+        overflow: hidden !important;
+    }
+    .modal {
+        z-index: 2100 !important;
+    }
+    .modal-backdrop {
+        z-index: 2090 !important;
+    }
+    #globalLoaderOverlay {
+        z-index: 2000 !important;
+    }
+
+    /* Estilo minimalista y elegante para el modal de historial completo */
+    #historialCompletoModal .modal-content {
+        border-radius: 1.2rem;
+        box-shadow: 0 8px 32px 0 rgba(108,99,255,0.10);
+        border: none;
+        background: #fcfcfe;
+        padding: 0.2rem 0.2rem 0.7rem 0.2rem;
+    }
+    #historialCompletoModal .modal-header {
+        border-bottom: 1px solid #ecebfa;
+        background: linear-gradient(90deg, #f7f7fd 60%, #ecebfa 100%);
+        border-top-left-radius: 1.2rem;
+        border-top-right-radius: 1.2rem;
+        padding: 1.2rem 1.5rem 1rem 1.5rem;
+    }
+    #historialCompletoModal .modal-title {
+        font-size: 1.25rem;
+        font-weight: 700;
+        color: #554ee0;
+        letter-spacing: -0.5px;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    #historialCompletoModal .btn-close {
+        background: none;
+        border: none;
+        font-size: 1.3rem;
+        opacity: 0.7;
+        transition: opacity 0.2s;
+    }
+    #historialCompletoModal .btn-close:hover {
+        opacity: 1;
+    }
+    #historialCompletoModal .table {
+        background: transparent;
+        border-radius: 0.8rem;
+        overflow: hidden;
+        box-shadow: 0 2px 12px 0 rgba(108,99,255,0.06);
+    }
+    #historialCompletoModal thead.table-light tr {
+        background: #f3f2fa;
+        border-bottom: 1px solid #ecebfa;
+    }
+    #historialCompletoModal th, #historialCompletoModal td {
+        border: none;
+        vertical-align: middle;
+        font-size: 1.01rem;
+        padding-top: 0.55rem;
+        padding-bottom: 0.55rem;
+    }
+    #historialCompletoModal th {
+        color: #6c63ff;
+        font-weight: 700;
+        letter-spacing: -0.5px;
+        background: #f7f7fd;
+    }
+    #historialCompletoModal td {
+        color: #222;
+        background: transparent;
+        font-weight: 500;
+    }
+    #historialCompletoModal tr {
+        transition: background 0.2s;
+    }
+    #historialCompletoModal tr:hover {
+        background: #ecebfa33;
+    }
+    #historialCompletoModal .badge {
+        border-radius: 1.2rem;
+        font-size: 0.97rem;
+        font-weight: 600;
+        padding: 0.32rem 0.9rem 0.32rem 0.7rem;
+        letter-spacing: -0.2px;
+        box-shadow: 0 1px 4px 0 rgba(108,99,255,0.07);
+        border: none;
+    }
+    #historialCompletoModal .badge.bg-success {
+        background: #eafaf3 !important;
+        color: #27ae60 !important;
+    }
+    #historialCompletoModal .badge.bg-danger {
+        background: #fff3f3 !important;
+        color: #e74c3c !important;
+    }
+    #historialCompletoModal .pagination {
+        margin-top: 1.2rem;
+        margin-bottom: 0.2rem;
+        gap: 0.2rem;
+    }
+    #historialCompletoModal .page-item .page-link {
+        border-radius: 0.8rem !important;
+        border: none;
+        color: #554ee0;
+        font-weight: 600;
+        background: #f7f7fd;
+        transition: background 0.2s, color 0.2s, box-shadow 0.2s;
+        box-shadow: 0 1px 4px 0 rgba(108,99,255,0.07);
+    }
+    #historialCompletoModal .page-item.active .page-link,
+    #historialCompletoModal .page-item .page-link:focus,
+    #historialCompletoModal .page-item .page-link:hover {
+        background: #ecebfa !important;
+        color: #554ee0 !important;
+        box-shadow: 0 2px 8px 0 rgba(108,99,255,0.10);
+    }
+    #historialCompletoModal .page-item.disabled .page-link {
+        color: #bbb !important;
+        background: #f7f7fd !important;
+        opacity: 0.7;
+    }
+    #historialCompletoModal th .fa {
+        margin-right: 0.35rem;
+        color: #b3b3c9;
+        font-size: 1.08rem;
+        vertical-align: middle;
+        opacity: 0.85;
+    }
+    #historialCompletoModal td .fa {
+        margin-right: 0.18rem;
+        color: #b3b3c9;
+        font-size: 1.01rem;
+        vertical-align: middle;
+        opacity: 0.75;
+    }
+    #historialCompletoModal .modal-dialog {
+        animation: historialModalFadeSlideIn 0.45s cubic-bezier(0.4,0,0.2,1);
+    }
+    @@keyframes historialModalFadeSlideIn {
+        0% { opacity: 0; transform: translateY(40px) scale(0.98); }
+        100% { opacity: 1; transform: translateY(0) scale(1); }
+    }
+    #historialCompletoModal tr.historial-row-anim {
+        opacity: 0;
+        transform: translateY(16px);
+        animation: historialRowFadeIn 0.6s cubic-bezier(0.4,0,0.2,1) forwards;
+    }
+    @@keyframes historialRowFadeIn {
+        0% { opacity: 0; transform: translateY(16px); }
+        100% { opacity: 1; transform: translateY(0); }
+    }
+    #historialCompletoModal tr:hover {
+        background: #ecebfa55;
+        box-shadow: 0 2px 12px 0 rgba(108,99,255,0.10);
+        transition: background 0.2s, box-shadow 0.2s;
+    }
+    #historialCompletoModal .badge {
+        transition: transform 0.18s cubic-bezier(0.4,0,0.2,1), box-shadow 0.18s;
+    }
+    #historialCompletoModal .badge.bg-success, #historialCompletoModal .badge.bg-danger {
+        animation: badgePop 0.5s cubic-bezier(0.4,0,0.2,1);
+    }
+    @@keyframes badgePop {
+        0% { transform: scale(0.7); opacity: 0; }
+        60% { transform: scale(1.15); opacity: 1; }
+        100% { transform: scale(1); opacity: 1; }
+    }
+
+    /* --- Estilo minimalista y elegante para el modal de productos y stock --- */
+    #productosModal .modal-content {
+        border-radius: 1.2rem;
+        box-shadow: 0 4px 32px 0 rgba(108,99,255,0.10);
+        background: #fcfcfe;
+        border: none;
+    }
+    #productosModal .modal-header {
+        border-bottom: 1px solid #ecebfa;
+        background: #f7f7fd;
+        border-top-left-radius: 1.2rem;
+        border-top-right-radius: 1.2rem;
+        padding-top: 1.3rem;
+        padding-bottom: 1.1rem;
+    }
+    #productosModal .modal-title {
+        font-weight: 700;
+        color: #222;
+        letter-spacing: -0.5px;
+        font-size: 1.35rem;
+    }
+    #productosModal .btn-close {
+        background: #ecebfa;
+        border-radius: 50%;
+        opacity: 0.7;
+        transition: background 0.2s, opacity 0.2s;
+    }
+    #productosModal .btn-close:hover {
+        background: #e0e0f7;
+        opacity: 1;
+    }
+    #productosModal .table {
+        background: #f7f7fd;
+        border-radius: 1.1rem;
+        overflow: hidden;
+        margin-bottom: 0;
+    }
+    #productosModal thead.table-light tr {
+        background: #f7f7fd;
+        border-top-left-radius: 1.1rem;
+        border-top-right-radius: 1.1rem;
+    }
+    #productosModal th, #productosModal td {
+        border: none;
+        padding-top: 0.85rem;
+        padding-bottom: 0.85rem;
+        font-size: 1.04rem;
+        vertical-align: middle;
+    }
+    #productosModal th {
+        color: #6c63ff;
+        font-weight: 600;
+        background: #f7f7fd;
+        border-bottom: 1px solid #ecebfa;
+    }
+    #productosModal td {
+        background: #fcfcfe;
+        color: #222;
+        border-bottom: 1px solid #f0f0fa;
+    }
+    #productosModal tr {
+        transition: background 0.18s, box-shadow 0.18s;
+    }
+    #productosModal tr:hover {
+        background: #ecebfa55;
+        box-shadow: 0 2px 12px 0 rgba(108,99,255,0.10);
+    }
+    #productosModal .form-control {
+        border-radius: 1.2rem;
+    }
+    #productosModal .sticky-top { top: 0; background: #f7f7fd; }
+    #productosModal .producto-expand-row td { border-bottom: 1px solid #ecebfa; }
+    @@keyframes expandFadeIn {
+        0% { opacity: 0; transform: translateY(-10px); }
+        100% { opacity: 1; transform: translateY(0); }
+    }
+    #productosModal .producto-expand-row td { animation: expandFadeIn 0.5s; }
+    #productosModal .producto-row { transition: background 0.18s, box-shadow 0.18s; }
+    #productosModal .producto-row:hover { background: #ecebfa44; box-shadow: 0 2px 8px 0 rgba(108,99,255,0.07); }
+    #productosModal .producto-expand-row td { background: #f3f2fa; }
+    #productosModal .pagination {
+        background: #f7f7fd;
+        border-radius: 1.2rem;
+        box-shadow: 0 2px 12px 0 rgba(108,99,255,0.06);
+        padding: 0.25rem 0.7rem;
+        display: inline-flex;
+        gap: 0.15rem;
+        border: 1px solid #ecebfa;
+    }
+    #productosModal .pagination .page-item {
+        margin: 0 0.08rem;
+    }
+    #productosModal .pagination .page-link {
+        border: none;
+        background: transparent;
+        color: #444;
+        font-weight: 500;
+        font-size: 1.08rem;
+        border-radius: 0.7rem !important;
+        transition: background 0.18s, color 0.18s, box-shadow 0.18s;
+        min-width: 2.2rem;
+        min-height: 2.2rem;
+        text-align: center;
+        outline: none;
+        box-shadow: none;
+    }
+    #productosModal .pagination .page-link:focus {
+        background: #ecebfa;
+        color: #554ee0;
+    }
+    #productosModal .pagination .page-item.active .page-link {
+        background: #2563ff;
+        color: #fff;
+        font-weight: 700;
+        box-shadow: 0 2px 8px 0 rgba(85,78,224,0.10);
+    }
+    #productosModal .pagination .page-item.disabled .page-link {
+        color: #bbb !important;
+        background: #f7f7fd !important;
+        opacity: 0.7;
+    }
+    #productosModal .pagination .page-link:hover:not(.active):not(:disabled) {
+        background: #ecebfa;
+        color: #2563ff;
+    }
+    #productosModal .pagination .page-link {
+        cursor: pointer;
+    }
 </style>
 
-<div class="container fade-in-dashboard mt-5">
-    <div class="dashboard-title">
-        <i class="fa fa-tachometer-alt text-dark"></i> Dashboard
-    </div>
-    <div class="dashboard-summary">
-        <div class="summary-card">
-            <div class="summary-icon"><i class="fa fa-box"></i></div>
-            <div class="summary-title">Medicamentos</div>
-            <div class="summary-value">*</div>
-        </div>
-        <div class="summary-card">
-            <div class="summary-icon"><i class="fa fa-exchange-alt"></i></div>
-            <div class="summary-title">Movimientos hoy</div>
-            <div class="summary-value">*</div>
-        </div>
-        <div class="summary-card">
-            <div class="summary-icon"><i class="fa fa-exclamation-triangle text-warning"></i></div>
-            <div class="summary-title">Stock bajo</div>
-            <div class="summary-value">*</div>
-        </div>
-    </div>
-    <div class="dashboard-section">
-        <h4><i class="fa fa-box text-secondary"></i> Resumen de Inventario</h4>
-        <p class="text-muted">Visualiza el estado general del inventario, movimientos recientes y alertas importantes.</p>
-        <!-- Aquí puedes agregar tablas, gráficos o widgets de resumen -->
-    </div>
-    <div class="dashboard-section">
-        <h4><i class="fa fa-bell text-warning"></i> Notificaciones</h4>
-        <ul class="list-unstyled mb-0">
-            <li><i class="fa fa-exclamation-circle text-danger"></i> Medicamentos con stock bajo</li>
-            <li><i class="fa fa-calendar-check text-success"></i> Últimos movimientos registrados</li>
-        </ul>
+<!-- Barra lateral de accesos rápidos -->
+<div class="dashboard-sidebar">
+    <a href="@Url.Action("RegistrarEntrada", "Movimientos")" class="sidebar-btn btn btn-success">
+        <i class="fa fa-arrow-down"></i> Registrar entrada
+    </a>
+    <a href="@Url.Action("RegistrarSalida", "Movimientos")" class="sidebar-btn btn btn-danger">
+        <i class="fa fa-arrow-up"></i> Registrar salida
+    </a>
+    @if (User.IsInRole("Admin"))
+{
+    <a href="@Url.Action("Reportes", "Home")" class="sidebar-btn btn btn-warning">
+        <i class="fa fa-chart-bar"></i> Ver reportes
+    </a>
+}
+</div>
+
+<div id="globalLoaderOverlay" style="display:none;position:fixed;top:0;left:0;width:100vw;height:100vh;z-index:2000;background:rgba(255,255,255,0.55);backdrop-filter:blur(2px);align-items:center;justify-content:center;">
+    <div style="background:rgba(255,255,255,0.95);border-radius:1.2rem;padding:2.2rem 2.5rem;box-shadow:0 4px 32px 0 rgba(108,99,255,0.13);display:flex;flex-direction:column;align-items:center;gap:1rem;">
+        <i class="fa fa-spinner fa-spin" style="font-size:2.5rem;color:#6c63ff;"></i>
+        <span style="font-size:1.15rem;color:#444;font-weight:500;">Cargando...</span>
     </div>
 </div>
 
+<div class="dashboard-main-layout">
+    <div class="container fade-in-dashboard mt-5">
+        <div class="dashboard-title">
+            <i class="fa fa-tachometer-alt text-dark"></i> Dashboard
+        </div>
+        
+
+        @* --- INICIO PATCH: KPI Medicamentos solo admin es <a>, usuarios es <div> --- *@
+<div class="dashboard-summary">
+    @if ((ViewBag.UserRole as string)?.ToLower() == "admin")
+    {
+        <a class="summary-card" id="kpi-total-productos" style="cursor:pointer; text-decoration:none;" data-kpi="productos" href="@Url.Action("Index", "Productos")">
+            <div class="summary-icon"><i class="fa fa-box"></i></div>
+            <div class="summary-title">Medicamentos</div>
+            <div class="summary-value">@Model.TotalProductos</div>
+        </a>
+    }
+    else
+    {
+        <div class="summary-card" id="kpi-total-productos" style="cursor:pointer" tabindex="0" role="button" data-bs-toggle="modal" data-bs-target="#productosModal">
+            <div class="summary-icon" onclick="event.stopPropagation(); event.preventDefault();"> <i class="fa fa-box"></i></div>
+            <div class="summary-title">Medicamentos</div>
+            <div class="summary-value">@Model.TotalProductos</div>
+        </div>
+    }
+    <div class="summary-card" id="kpi-movimientos-hoy" data-kpi="movimientos">
+        <div class="summary-icon"><i class="fa fa-exchange-alt"></i></div>
+        <div class="summary-title">Movimientos hoy</div>
+        <div class="summary-value">@Model.MovimientosHoy</div>
+    </div>
+    <div class="summary-card" id="kpi-stock-bajo" data-kpi="stockbajo">
+        <div class="summary-icon"><i class="fa fa-exclamation-triangle text-warning"></i></div>
+        <div class="summary-title">Stock bajo</div>
+        <div class="summary-value">@Model.ProductosStockBajo</div>
+    </div>
+</div>
+@* --- FIN PATCH --- *@
+
+
+        @* Sección de alertas solo si hay algo que mostrar *@
+        @{
+            var mostrarAlertas = Model.ProductosProximosAVencer > 0 || Model.ProductosStockBajo > 0;
+        } @if (mostrarAlertas)
+        {
+            <div class="dashboard-section dashboard-alert-section mb-4">
+                <div class="row g-3 align-items-center">
+                    @if (Model.ProductosProximosAVencer > 0)
+                    {
+                        <div class="col-md-6">
+                            <div class="alert alert-warning d-flex align-items-center gap-3 p-3 mb-0 rounded-3 shadow-sm dashboard-alert-card">
+                                <i class="fa fa-exclamation-triangle fa-2x text-warning"></i>
+                                <div>
+                                    <div class="fw-bold text-warning">Productos próximos a vencer</div>
+                                    <div class="text-muted small">¡Revisa los lotes que vencen en los próximos 30 días!</div>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                    @if (Model.ProductosStockBajo > 0)
+                    {
+                        <div class="col-md-6">
+                            <div class="alert alert-danger d-flex align-items-center gap-3 p-3 mb-0 rounded-3 shadow-sm dashboard-alert-card">
+                                <i class="fa fa-exclamation-circle fa-2x text-danger"></i>
+                                <div>
+                                    <div class="fw-bold text-danger">Stock crítico</div>
+                                    <div class="text-muted small">Hay productos con stock por debajo del mínimo recomendado.</div>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+        }
+            
+
+
+        <div class="row g-4">
+            <div class="col-lg-6">
+                <div class="dashboard-section">
+                    <h4><i class="fa fa-exclamation-circle text-danger"></i> Productos con stock bajo</h4>
+                    @if (Model.ProductosStockBajoList.Any())
+                    {
+                        <div class="table-responsive">
+                            <table class="table table-borderless dashboard-movimientos-elegant mb-0">
+                                <thead>
+                                    <tr>
+                                        <th class="mov-th">Producto</th>
+                                        <th class="mov-th text-end">Cantidad actual</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                @foreach (var p in Model.ProductosStockBajoList)
+                                {
+                                    <tr>
+                                        <td><span class="mov-elegant-icon"><i class="fa fa-capsules"></i></span> <span class="mov-elegant-product">@p.Nombre</span></td>
+                                        <td class="text-end mov-elegant-cantidad">@p.CantidadActual</td>
+                                    </tr>
+                                }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="text-success">No hay productos con stock bajo.</div>
+                    }
+                </div>
+            <div class="dashboard-section">
+                <h4><i class="fa fa-exclamation-triangle text-warning"></i> Productos próximos a vencer</h4>
+                @if (Model.ProductosProximosAVencerList.Any())
+                {
+                    <div class="table-responsive">
+                        <table class="table table-borderless dashboard-movimientos-elegant mb-0">
+                            <thead>
+                                <tr>
+                                    <th class="mov-th">Producto</th>
+                                    <th class="mov-th text">Fecha de vencimiento</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                            @foreach (var p in Model.ProductosProximosAVencerList)
+                            {
+                                <tr>
+                                    <td><span class="mov-elegant-icon"><i class="fa fa-capsules"></i></span> <span class="mov-elegant-product">@p.Nombre</span></td>
+                                    <td>@p.FechaVencimiento.ToString("dd/MM/yyyy")</td>
+                                </tr>
+                            }
+                            </tbody>
+                        </table>
+                    </div>
+                }
+                else
+                {
+                    <div class="text-success">No hay productos próximos a vencer.</div>
+                }
+            </div>
+        </div>
+
+            <div class="col-lg-6">
+                <div class="dashboard-section">
+                    <h4><i class="fa fa-calendar-check text-success"></i> Movimientos recientes</h4>
+                    @if (Model.MovimientosRecientes.Any())
+                    {
+                        <div class="table-responsive">
+                            <table class="table table-borderless dashboard-movimientos-elegant mb-0">
+                                <thead>
+                                    <tr>
+                                        <th class="mov-th">Producto</th>
+                                        <th class="mov-th">Tipo</th>
+                                        <th class="mov-th text-end">Cantidad</th>
+                                        <th class="mov-th">Fecha</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                @foreach (var m in Model.MovimientosRecientes)
+                                {
+                                    var isSalida = m.Tipo == "Salida";
+                                    var cantidadColor = isSalida ? "#e74c3c" : "#27ae60";
+                                    <tr class="mov-row" tabindex="0">
+                                        <td>
+                                            <span class="mov-elegant-icon"><i class="fa fa-capsules"></i></span>
+                                            <span class="mov-elegant-product">@m.Producto</span>
+                                        </td>
+                                        <td>
+                                            <span class="badge mov-elegant-badge @(isSalida ? "mov-elegant-badge-salida" : "mov-elegant-badge-entrada")" 
+                                                  data-bs-toggle="tooltip" 
+                                                  title="@(isSalida ? "Salida de inventario" : "Entrada de inventario")">
+                                                <i class="fa @(isSalida ? "fa-arrow-up" : "fa-arrow-down") mov-badge-icon"></i> @m.Tipo
+                                            </span>
+                                        </td>
+                                        <td class="text-end mov-elegant-cantidad" style="color:@cantidadColor"
+                                            data-bs-toggle="tooltip" 
+                                            title="@(isSalida ? "Cantidad retirada" : "Cantidad ingresada")">
+                                            @m.Cantidad
+                                        </td>
+                                        <td class="mov-elegant-fecha">
+                                            @if(DateTime.TryParse(m.Fecha, out var fecha)) {
+                                                if (fecha.Date == DateTime.Today) {
+                                                    <span title="@fecha.ToString("dd/MMM/yyyy HH:mm")">hoy @fecha.ToString("HH:mm")</span>
+                                                } else {
+                                                    <span title="@fecha.ToString("dd/MMM/yyyy HH:mm")">@fecha.ToString("dd/MMM/yyyy HH:mm")</span>
+                                                }
+                                            } else {
+                                                @m.Fecha
+                                            }
+                                        </td>
+                                    </tr>
+                                }
+                                </tbody>
+                            </table>
+                        </div>
+                    <div class="text-end mt-3">
+                        <a id="verHistorialCompletoBtn" class="btn btn-link text-decoration-none fw-bold ver-historial-btn" style="font-size:1.08rem;">
+                            <i class="fa fa-history"></i> Ver historial completo
+                        </a>
+                    </div>
+                    }
+                    else
+                    {
+                        <div class="text-muted">No hay movimientos recientes.</div>
+                    }
+                </div>
+            </div>
+        </div>
+        <div class="dashboard-section mt-4">
+            <h4><i class="fa fa-chart-line text-primary"></i> Movimientos por día</h4>
+            <canvas id="movimientosPorDiaChart" height="80" style="cursor:pointer" data-chart="movimientos"></canvas>
+        </div>
+        <div class="dashboard-section mt-4">
+            <h4><i class="fa fa-chart-bar text-info"></i> Top 5 productos más movidos</h4>
+            <canvas id="topProductosMasMovidosChart" height="100" style="cursor:pointer" data-chart="top-productos"></canvas>
+        </div>
+
+        <!-- Modal para drill-down de detalles -->
+        <!-- Eliminado: ya no se usa para KPIs de movimientos hoy y stock bajo -->
+        <div class="modal fade" id="dashboardDetailModal" tabindex="-1" aria-labelledby="dashboardDetailModalLabel" aria-hidden="true">
+          <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h5 class="modal-title" id="dashboardDetailModalLabel">Detalle</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+              </div>
+              <div class="modal-body" id="dashboardDetailModalBody">
+                <!-- Contenido dinámico -->
+              </div>
+            </div>
+          </div>
+        </div>
+
+    </div> <!-- Cierre de .dashboard-main-layout -->
+
+    <!-- Modal para historial completo (mover al final del body) -->
+    <div class="modal fade" id="historialCompletoModal" tabindex="-1" aria-labelledby="historialCompletoModalLabel" aria-hidden="true">
+      <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="historialCompletoModalLabel"><i class="fa fa-history"></i> Historial completo de movimientos</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+          </div>
+          <div class="modal-body">
+            <div class="table-responsive mb-3">
+              <table class="table table-hover table-bordered align-middle mb-0">
+                <thead class="table-light">
+                  <tr>
+                    <th><i class="fa fa-capsules"></i> Producto</th>
+                    <th><i class="fa fa-exchange-alt"></i> Tipo</th>
+                    <th><i class="fa fa-sort-numeric-up"></i> Cantidad</th>
+                    <th><i class="fa fa-calendar-alt"></i> Fecha</th>
+                    <th><i class="fa fa-comment-dots"></i> Observaciones</th>
+                  </tr>
+                </thead>
+                <tbody id="historialCompletoBody">
+                  <!-- JS llenará aquí -->
+                </tbody>
+              </table>
+            </div>
+            <nav>
+              <ul class="pagination justify-content-center" id="historialPagination">
+                <!-- JS llenará aquí -->
+              </ul>
+            </nav>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal para productos y stock (solo para usuarios no admin) -->
+    @if ((ViewBag.UserRole as string)?.ToLower() != "admin")
+    {
+        <div class="modal fade" id="productosModal" tabindex="-1" aria-labelledby="productosModalLabel" aria-hidden="true">
+      <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="productosModalLabel">Productos y stock disponible</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+          </div>
+          <div class="modal-body">
+            <div class="mb-3 d-flex flex-wrap align-items-center gap-2">
+                <input id="buscadorProductosStock" type="text" class="form-control shadow-sm" style="max-width:320px;" placeholder="Buscar producto, laboratorio, categoría..." autocomplete="off" />
+            </div>
+            <div class="table-responsive position-relative">
+              <table class="table table-hover table-bordered align-middle mb-0" style="background: #f7f7fd; border-radius: 1.1rem;">
+                <thead class="table-light sticky-top" style="z-index:2;">
+                  <tr>
+                    <th style="width:32%"><i class="fa fa-capsules"></i> Producto</th>
+                    <th style="width:13%"><i class="fa fa-flask"></i> Presentación</th>
+                    <th style="width:13%"><i class="fa fa-industry"></i> Laboratorio</th>
+                    <th style="width:13%"><i class="fa fa-tags"></i> Categoría</th>
+                    <th style="width:8%"><i class="fa fa-balance-scale"></i> Unidad</th>
+                    <th style="width:10%"><i class="fa fa-vial"></i> Concentración</th>
+                    <th style="width:11%"><i class="fa fa-sort-numeric-up"></i> Stock</th>
+                  </tr>
+                </thead>
+                <tbody id="productosStockBody">
+                  <!-- JS llenará aquí -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    }
+    <!-- Modal info producto -->
+    <div class="modal fade" id="infoProductoModal" tabindex="-1" aria-labelledby="infoProductoModalLabel" aria-hidden="true">
+      <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="infoProductoModalLabel">Detalle del producto</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+          </div>
+          <div class="modal-body" id="infoProductoModalBody">
+            <!-- Aquí se mostrará la info -->
+          </div>
+        </div>
+      </div>
+    </div>
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        document.querySelectorAll('.ver-info-btn').forEach(function(btn) {
+            btn.addEventListener('click', function(e) {
+                e.preventDefault();
+                var nombre = btn.getAttribute('data-nombre');
+                var productos = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(
+                    Model.ProductosStockBajoList.Concat(Model.ProductosProximosAVencerList.Select(x => new clinicaDukeDB.Models.ProductoStockBajo { Nombre = x.Nombre, CantidadActual = 0 })).DistinctBy(x => x.Nombre)));
+                var prod = productos.find(p => p.Nombre === nombre);
+                var html = `<div class='row'><div class='col-md-6'><b>Nombre:</b> ${prod.Nombre || '-'}<br><b>Stock:</b> ${prod.CantidadActual ?? '-'}<br></div></div>`;
+                document.getElementById('infoProductoModalBody').innerHTML = html;
+                var modal = new bootstrap.Modal(document.getElementById('infoProductoModal'));
+                modal.show();
+            });
+        });
+    });
+    </script>
+    <!-- Fin modal productos -->
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="~/js/dashboard.charts.js" asp-append-version="true"></script>
+    <script src="~/js/dashboard.historial.js" asp-append-version="true"></script>
+}
+
 <script>
-window.addEventListener('DOMContentLoaded', function() {
+    window.addEventListener('chartjs:loaded', function() {
+    var ctx = document.getElementById('movimientosPorDiaChart').getContext('2d');
+    var labels = @Html.Raw(JsonSerializer.Serialize(Model.MovimientosPorDia.Select(x => x.Fecha)));
+    var data = @Html.Raw(JsonSerializer.Serialize(Model.MovimientosPorDia.Select(x => x.Total)));
+    new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'Movimientos',
+                data: data,
+                borderColor: '#6c63ff',
+                backgroundColor: 'rgba(108,99,255,0.10)',
+                fill: true,
+                tension: 0.35,
+                pointRadius: 5,
+                pointBackgroundColor: '#6c63ff',
+                pointBorderColor: '#fff',
+                pointHoverRadius: 8,
+                pointHoverBackgroundColor: '#554ee0',
+                pointHoverBorderColor: '#fff',
+                pointBorderWidth: 2
+            }]
+        },
+        options: {
+            responsive: true,
+            animation: {
+                duration: 1000,
+                easing: 'easeOutQuart'
+            },
+            plugins: {
+                legend: { display: false },
+                tooltip: {
+                    mode: 'index',
+                    intersect: false,
+                    backgroundColor: '#fff',
+                    titleColor: '#554ee0',
+                    bodyColor: '#444',
+                    borderColor: '#ecebfa',
+                    borderWidth: 1,
+                    padding: 12,
+                    caretSize: 7,
+                    cornerRadius: 8,
+                    displayColors: false,
+                    callbacks: {
+                        title: function(context) {
+                            return 'Fecha: ' + context[0].label;
+                        },
+                        label: function(context) {
+                            return 'Movimientos: ' + context.parsed.y;
+                        }
+                    }
+                }
+            },
+            scales: {
+                x: {
+                    grid: { display: false },
+                    ticks: {
+                        color: '#888',
+                        font: { weight: '500', size: 13 },
+                        maxRotation: 35,
+                        minRotation: 15,
+                        autoSkip: true,
+                        maxTicksLimit: 8
+                    }
+                },
+                y: {
+                    beginAtZero: true,
+                    grid: { color: '#ecebfa' },
+                    ticks: {
+                        color: '#888',
+                        font: { weight: '500', size: 13 }
+                    }
+                }
+            }
+        }
+    });
+
+        // Gráfica de barras Top 5 productos más movidos
+        var ctxTop = document.getElementById('topProductosMasMovidosChart').getContext('2d');
+        var topLabels = @Html.Raw(JsonSerializer.Serialize(Model.TopProductosMasMovidos.Select(x => x.Nombre)));
+        var topData = @Html.Raw(JsonSerializer.Serialize(Model.TopProductosMasMovidos.Select(x => x.TotalMovimientos)));
+        console.log('Chart.js loaded:', typeof Chart !== 'undefined');
+        console.log('ChartDataLabels loaded:', typeof ChartDataLabels !== 'undefined');
+        console.log('topLabels:', topLabels);
+        console.log('topData:', topData);
+        // Calcular el máximo dinámico para el eje Y y dejar espacio extra arriba
+        var maxValue = Math.max.apply(null, topData);
+        function getNiceMax(val) {
+            if (val <= 10) return Math.ceil(val / 2) * 2;
+            if (val <= 50) return Math.ceil(val / 5) * 5;
+            if (val <= 100) return Math.ceil(val / 10) * 10;
+            if (val <= 500) return Math.ceil(val / 50) * 50;
+            if (val <= 1000) return Math.ceil(val / 100) * 100;
+            return Math.ceil(val / 500) * 500;
+        }
+        var yMax = getNiceMax(maxValue * 1.2);
+        new Chart(ctxTop, {
+            type: 'bar',
+            data: {
+                labels: topLabels,
+                datasets: [{
+                    label: '',
+                    data: topData,
+                    backgroundColor: [
+                        'rgba(108,99,255,0.18)',
+                        'rgba(39,174,96,0.18)',
+                        'rgba(230,126,34,0.18)',
+                        'rgba(231,76,60,0.18)',
+                        'rgba(85,78,224,0.18)'
+                    ],
+                    borderColor: [
+                        'rgba(108,99,255,0.18)',
+                        'rgba(39,174,96,0.18)',
+                        'rgba(230,126,34,0.18)',
+                        'rgba(231,76,60,0.18)',
+                        'rgba(85,78,224,0.18)'
+                    ],
+                    borderWidth: 0,
+                    borderRadius: 6,
+                    maxBarThickness: 44,
+                    barPercentage: 0.6,
+                    categoryPercentage: 0.5,
+                    datalabels: {
+                        anchor: 'end',
+                        align: 'top', // Cambia a 'top' para forzar que el número esté encima de la barra
+                        color: '#666',
+                        font: { weight: '400', size: 16 },
+                        offset: 4, // Espacio pequeño arriba de la barra
+                        clip: false, // Permite que el número sobresalga si es necesario
+                        formatter: function(value) { return value; }
+                    },
+                    hoverBackgroundColor: [
+                        'rgba(108,99,255,0.18)',
+                        'rgba(39,174,96,0.18)',
+                        'rgba(230,126,34,0.18)',
+                        'rgba(231,76,60,0.18)',
+                        'rgba(85,78,224,0.18)'
+                    ]
+                }]
+            },
+            options: {
+                responsive: true,
+                animation: {
+                    duration: 800,
+                    easing: 'easeOutCubic'
+                },
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        enabled: true,
+                        backgroundColor: '#fff',
+                        titleColor: '#444',
+                        bodyColor: '#666',
+                        borderColor: 'rgba(0,0,0,0)',
+                        borderWidth: 0,
+                        padding: 10,
+                        caretSize: 6,
+                        cornerRadius: 8,
+                        displayColors: false,
+                        callbacks: {
+                            label: function(context) {
+                                return context.parsed.y + ' movimientos';
+                            }
+                        }
+                    },
+                    datalabels: {
+                        display: true
+                    }
+                },
+                scales: {
+                    x: {
+                        grid: { display: false },
+                        ticks: {
+                            color: '#aaa',
+                            font: { weight: '400', size: 14 },
+                            padding: 8
+                        }
+                    },
+                    y: {
+                        beginAtZero: true,
+                        grid: { color: '#f3f2fa' },
+                        ticks: {
+                            color: '#bbb',
+                            font: { weight: '400', size: 13 },
+                            stepSize: Math.ceil(yMax / 5),
+                        },
+                        max: yMax
+                    }
+                }
+            },
+            plugins: [ChartDataLabels]
+        });
+    });
+    // Tooltips Bootstrap para la tabla de movimientos
+    document.addEventListener('DOMContentLoaded', function() {
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+        tooltipTriggerList.forEach(function (tooltipTriggerEl) {
+            new bootstrap.Tooltip(tooltipTriggerEl, {animation:true, delay:{show:200, hide:100}});
+        });
+    });
+    // Animación de filas al cargar
+    document.querySelectorAll('.movimiento-row-anim').forEach(function(row, i) {
+        row.style.opacity = 0;
+        setTimeout(function() {
+            row.style.transition = 'opacity 0.7s cubic-bezier(0.4,0,0.2,1)';
+            row.style.opacity = 1;
+        }, 200 + i*80);
+    });
+    // Botón historial (abrir modal correctamente con Bootstrap)
+    // Eliminado: el control del modal y la carga de datos se realiza únicamente en dashboard.historial.js para evitar conflictos y doble apertura
+    window.addEventListener('DOMContentLoaded', function() {
+    var errorMsg = document.getElementById('dashboardErrorToast');
+    if (errorMsg) {
+        setTimeout(function() {
+            errorMsg.classList.add('hide');
+        }, 2500);
+        setTimeout(function() {
+            errorMsg.style.display = 'none';
+        }, 3200);
+    }
     var msg = document.getElementById('dashboardSuccessToast');
     if (msg) {
-        setTimeout(function() {
-            msg.style.opacity = '0';
-        }, 3200);
-        setTimeout(function() {
-            msg.style.display = 'none';
-        }, 3900);
+        setTimeout(function() { msg.style.opacity = '0'; }, 3200);
+        setTimeout(function() { msg.style.display = 'none'; }, 3900);
     }
+});
+    // Fade out automático del toast después de 5 segundos
+    setTimeout(function() {
+        var notif = document.getElementById('dashboardNotifToast');
+        if (notif) notif.classList.add('hide');
+    }, 5000);
+
+    // Drill-down: solo navegación para KPIs y gráficos
+    document.querySelectorAll('.summary-card').forEach(function(card) {
+        card.addEventListener('click', function() {
+            var kpi = card.getAttribute('data-kpi');
+            if (kpi === 'productos') {
+                window.location.href = '@Url.Action("Index", "Productos")';
+            }
+            // Para los otros KPIs, no hacer nada (los detalles ya están en la vista)
+        });
+    });
+    // Gráficos clicables
+    document.getElementById('movimientosPorDiaChart').addEventListener('click', function() {
+        window.location.href = '@Url.Action("Historial", "Movimientos")';
+    });
+    // Mostrar overlay de carga global al hacer clic en los botones de la barra lateral
+    document.querySelectorAll('.dashboard-sidebar .sidebar-btn').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+            document.getElementById('globalLoaderOverlay').style.display = 'flex';
+        });
+    });
+    // Ocultar overlay de carga global después de 3 segundos (simulando carga)
+    setTimeout(function() {
+        document.getElementById('globalLoaderOverlay').style.display = 'none';
+    }, 3000);
+
+    // Oculta cualquier overlay global al abrir el modal de historial
+    const historialModalEl = document.getElementById('historialCompletoModal');
+    historialModalEl.addEventListener('show.bs.modal', function () {
+        var overlay = document.getElementById('globalLoaderOverlay');
+        if (overlay) overlay.style.display = 'none';
+    });
+
+    // Evita navegación para usuarios normales al hacer clic en el KPI de medicamentos
+(function() {
+    var userRole = '@(ViewBag.UserRole as string ?? "")'.toLowerCase();
+    if (userRole !== 'admin') {
+        var kpi = document.getElementById('kpi-total-productos');
+        if (kpi) {
+            kpi.addEventListener('click', function(e) {
+                // Solo abrir modal, nunca navegar
+                e.stopPropagation();
+                e.preventDefault();
+                var modal = document.getElementById('productosModal');
+                if (modal) {
+                    var bsModal = bootstrap.Modal.getOrCreateInstance(modal);
+                    bsModal.show();
+                }
+                return false;
+            });
+        }
+    }
+})();
+</script>
+
+<script>
+// --- Productos y stock con paginación, buscador, filas expandibles y animación ---
+document.addEventListener('DOMContentLoaded', function() {
+    var productos = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.TodosLosProductosDetallado));
+    var productosFiltrados = productos.slice();
+    var productosPorPagina = 10;
+    var paginaActual = 1;
+    var totalPaginas = Math.ceil(productosFiltrados.length / productosPorPagina);
+    var expandedRow = null;
+
+    function renderTablaProductos(animar = true) {
+        var tbody = document.getElementById('productosStockBody');
+        tbody.innerHTML = '';
+        var inicio = (paginaActual - 1) * productosPorPagina;
+        var fin = Math.min(inicio + productosPorPagina, productosFiltrados.length);
+        for (var i = inicio; i < fin; i++) {
+            var p = productosFiltrados[i];
+            var stockClass = p.CantidadActual < 10 ? 'text-danger fw-bold' : '';
+            var tr = document.createElement('tr');
+            tr.className = 'producto-row';
+            tr.setAttribute('tabindex', '0');
+            tr.setAttribute('data-id', p.Id);
+            tr.style.cursor = 'pointer';
+            tr.innerHTML = `
+                <td><span class="fw-semibold">${p.Nombre}</span></td>
+                <td>${p.Presentacion || '-'}</td>
+                <td>${p.Laboratorio || '-'}</td>
+                <td>${p.Categoria || '-'}</td>
+                <td>${p.UnidadMedida || '-'}</td>
+                <td>${p.Concentracion || '-'}</td>
+                <td class='${stockClass}'>${p.CantidadActual}</td>
+            `;
+            // Animación de entrada
+            if (animar) {
+                tr.style.opacity = 0;
+                setTimeout(((row, idx) => () => {
+                    row.style.transition = 'opacity 0.7s cubic-bezier(0.4,0,0.2,1)';
+                    row.style.opacity = 1;
+                })(tr, i-inicio), 120 + (i-inicio)*60);
+            }
+            // Fila expandible
+            tr.addEventListener('click', function(e) {
+                e.stopPropagation();
+                var id = this.getAttribute('data-id');
+                // Si ya está expandida, colapsar
+                if (expandedRow && expandedRow.id == id) {
+                    expandedRow = null;
+                    renderTablaProductos(false);
+                    return;
+                }
+                expandedRow = { id: id, idx: i };
+                renderTablaProductos(false);
+                // Scroll a la fila expandida si está fuera de vista
+                setTimeout(() => {
+                    var expanded = document.querySelector('.producto-expand-row');
+                    if (expanded) expanded.scrollIntoView({behavior:'smooth', block:'nearest'});
+                }, 200);
+            });
+            tbody.appendChild(tr);
+            // Si esta fila debe expandirse
+            if (expandedRow && expandedRow.id == p.Id.toString()) {
+                var trExpand = document.createElement('tr');
+                trExpand.className = 'producto-expand-row';
+                var detalles = `
+                    <div class='row g-2'>
+                        <div class='col-md-6'><b>Descripción:</b> ${p.Descripcion || '-'}<br></div>
+                        <div class='col-md-3'><b>Código de barras:</b> ${p.CodigoBarras || '-'}</div>
+                        <div class='col-md-3'><b>Fecha vencimiento:</b> ${p.FechaVencimiento ? (p.FechaVencimiento.split('T')[0].split('-').reverse().join('/') ) : '-'}</div>
+                    </div>
+                `;
+                trExpand.innerHTML = `<td colspan="7" style="background:#f3f2fa; border-top:1px solid #ecebfa; border-bottom-left-radius:0.7rem; border-bottom-right-radius:0.7rem; animation: expandFadeIn 0.5s;">${detalles}</td>`;
+                tbody.appendChild(trExpand);
+            }
+        }
+        renderPaginacion();
+    }
+
+    function renderPaginacion() {
+        var paginacion = document.getElementById('productosStockPagination');
+        if (!paginacion) return;
+        paginacion.innerHTML = '';
+        // Flecha anterior
+        var prevLi = document.createElement('li');
+        prevLi.className = 'page-item' + (paginaActual === 1 ? ' disabled' : '');
+        var prevA = document.createElement('a');
+        prevA.className = 'page-link';
+        prevA.href = '#';
+        prevA.innerHTML = '&laquo;';
+        prevA.addEventListener('click', function(e) {
+            e.preventDefault();
+            if (paginaActual > 1) {
+                paginaActual--;
+                expandedRow = null;
+                renderTablaProductos();
+            }
+        });
+        prevLi.appendChild(prevA);
+        paginacion.appendChild(prevLi);
+        // Números de página
+        for (var i = 1; i <= Math.ceil(productosFiltrados.length / productosPorPagina); i++) {
+            if (i === 1 || i === Math.ceil(productosFiltrados.length / productosPorPagina) || Math.abs(i - paginaActual) <= 1) {
+                var li = document.createElement('li');
+                li.className = 'page-item' + (i === paginaActual ? ' active' : '');
+                var a = document.createElement('a');
+                a.className = 'page-link';
+                a.href = '#';
+                a.textContent = i;
+                a.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    paginaActual = parseInt(this.textContent);
+                    expandedRow = null;
+                    renderTablaProductos();
+                });
+                li.appendChild(a);
+                paginacion.appendChild(li);
+            } else if (i === paginaActual - 2 || i === paginaActual + 2) {
+                var liDots = document.createElement('li');
+                liDots.className = 'page-item disabled';
+                var span = document.createElement('span');
+                span.className = 'page-link';
+                span.textContent = '...';
+                liDots.appendChild(span);
+                paginacion.appendChild(liDots);
+            }
+        }
+        // Flecha siguiente
+        var nextLi = document.createElement('li');
+        nextLi.className = 'page-item' + (paginaActual === Math.ceil(productosFiltrados.length / productosPorPagina) ? ' disabled' : '');
+        var nextA = document.createElement('a');
+        nextA.className = 'page-link';
+        nextA.href = '#';
+        nextA.innerHTML = '&raquo;';
+        nextA.addEventListener('click', function(e) {
+            e.preventDefault();
+            if (paginaActual < Math.ceil(productosFiltrados.length / productosPorPagina)) {
+                paginaActual++;
+                expandedRow = null;
+                renderTablaProductos();
+            }
+        });
+        nextLi.appendChild(nextA);
+        paginacion.appendChild(nextLi);
+        // Rango de productos
+        var rango = document.getElementById('productosStockRango');
+        if (rango) {
+            var inicio = (productosFiltrados.length === 0 ? 0 : ( (paginaActual-1)*productosPorPagina+1 ));
+            var fin = Math.min(paginaActual*productosPorPagina, productosFiltrados.length);
+            rango.textContent = `${inicio} - ${fin} de ${productosFiltrados.length}`;
+        }
+    }
+
+    // Buscador en tiempo real
+    var buscador = document.getElementById('buscadorProductosStock');
+    buscador.addEventListener('input', function() {
+        var q = this.value.trim().toLowerCase();
+        productosFiltrados = productos.filter(function(p) {
+            return (
+                (p.Nombre && p.Nombre.toLowerCase().includes(q)) ||
+                (p.Laboratorio && p.Laboratorio.toLowerCase().includes(q)) ||
+                (p.Categoria && p.Categoria.toLowerCase().includes(q)) ||
+                (p.Presentacion && p.Presentacion.toLowerCase().includes(q)) ||
+                (p.UnidadMedida && p.UnidadMedida.toLowerCase().includes(q)) ||
+                (p.Concentracion && p.Concentracion.toLowerCase().includes(q))
+            );
+        });
+        paginaActual = 1;
+        expandedRow = null;
+        renderTablaProductos();
+    });
+
+    // Insertar paginación visual debajo de la tabla
+    var tabla = document.querySelector('#productosModal .table-responsive');
+    if (tabla && !document.getElementById('productosStockPagination')) {
+        var nav = document.createElement('nav');
+        nav.className = 'mt-3 d-flex align-items-center justify-content-between';
+        var rango = document.createElement('span');
+        rango.id = 'productosStockRango';
+        rango.className = 'text-muted ms-2';
+        nav.appendChild(rango);
+        var ul = document.createElement('ul');
+        ul.className = 'pagination justify-content-center mb-0';
+        ul.id = 'productosStockPagination';
+        nav.appendChild(ul);
+        tabla.parentNode.insertBefore(nav, tabla.nextSibling);
+    }
+
+    renderTablaProductos();
 });
 </script>
