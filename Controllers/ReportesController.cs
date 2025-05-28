@@ -18,7 +18,7 @@ namespace clinicaDukeDB.Controllers
         }
 
         [HttpGet]
-        public IActionResult ObtenerHistorialMovimientosPorNombre(string producto, string fechaInicio, string fechaFin, int pagina = 1, int tamanoPagina = 10)
+        public IActionResult ObtenerHistorialMovimientosPorNombre(string producto = "", string fechaInicio = "", string fechaFin = "", int pagina = 1, int tamanoPagina = 10)
         {
             string? connectionString = _configuration.GetConnectionString("ClinicaDukeDb");
             if (string.IsNullOrEmpty(connectionString))
@@ -27,8 +27,23 @@ namespace clinicaDukeDB.Controllers
             var historial = new List<MovimientoReciente>();
             int totalRegistros = 0;
             int? idProducto = null;
-            if (int.TryParse(producto, out int id))
+            if (!string.IsNullOrWhiteSpace(producto) && int.TryParse(producto, out int id))
                 idProducto = id;
+
+            DateTime? fechaInicioDt = null;
+            DateTime? fechaFinDt = null;
+            if (!string.IsNullOrWhiteSpace(fechaInicio))
+            {
+                DateTime temp;
+                if (DateTime.TryParseExact(fechaInicio, "dd/MM/yyyy", null, System.Globalization.DateTimeStyles.None, out temp))
+                    fechaInicioDt = temp;
+            }
+            if (!string.IsNullOrWhiteSpace(fechaFin))
+            {
+                DateTime temp;
+                if (DateTime.TryParseExact(fechaFin, "dd/MM/yyyy", null, System.Globalization.DateTimeStyles.None, out temp))
+                    fechaFinDt = temp;
+            }
 
             using (var connection = new SqlConnection(connectionString))
             {
@@ -37,8 +52,8 @@ namespace clinicaDukeDB.Controllers
                 {
                     command.CommandType = System.Data.CommandType.StoredProcedure;
                     command.Parameters.AddWithValue("@IdProducto", (object?)idProducto ?? DBNull.Value);
-                    command.Parameters.AddWithValue("@FechaInicio", string.IsNullOrWhiteSpace(fechaInicio) ? (object)DBNull.Value : DateTime.ParseExact(fechaInicio, "dd/MM/yyyy", null));
-                    command.Parameters.AddWithValue("@FechaFin", string.IsNullOrWhiteSpace(fechaFin) ? (object)DBNull.Value : DateTime.ParseExact(fechaFin, "dd/MM/yyyy", null));
+                    command.Parameters.AddWithValue("@FechaInicio", (object?)fechaInicioDt ?? DBNull.Value);
+                    command.Parameters.AddWithValue("@FechaFin", (object?)fechaFinDt ?? DBNull.Value);
                     using (var reader = command.ExecuteReader())
                     {
                         while (reader.Read())

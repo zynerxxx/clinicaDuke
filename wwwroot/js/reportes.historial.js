@@ -12,7 +12,10 @@ $(document).ready(function () {
             type: 'GET',
             data: {
                 pagina: page,
-                tamanoPagina: pageSize
+                tamanoPagina: pageSize,
+                producto: '', // Siempre enviar producto vacío
+                fechaInicio: '', // Siempre enviar fecha vacía
+                fechaFin: '' // Siempre enviar fecha vacía
             },
             success: function (response) {
                 let newRowsHtml = '';

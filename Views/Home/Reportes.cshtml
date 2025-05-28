@@ -969,23 +969,25 @@
             <div class="reporte-card-body">
                 @if (Model.ProductosStockBajo.Any())
                 {
-                    <table class="table table-sm table-bordered">
-                        <thead>
-                            <tr>
-                                <th>Producto</th>
-                                <th>Cantidad actual</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                        @foreach (var p in Model.ProductosStockBajo)
-                        {
-                            <tr>
-                                <td>@p.Nombre</td>
-                                <td>@p.CantidadActual</td>
-                            </tr>
-                        }
-                        </tbody>
-                    </table>
+                    <div class="table-responsive">
+                        <table class="table table-borderless dashboard-movimientos-elegant mb-0">
+                            <thead>
+                                <tr>
+                                    <th class="mov-th">Producto</th>
+                                    <th class="mov-th text-end">Cantidad actual</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                            @foreach (var p in Model.ProductosStockBajo)
+                            {
+                                <tr>
+                                    <td><span class="mov-elegant-icon"><i class="fa fa-capsules"></i></span> <span class="mov-elegant-product">@p.Nombre</span></td>
+                                    <td class="text-end mov-elegant-cantidad">@p.CantidadActual</td>
+                                </tr>
+                            }
+                            </tbody>
+                        </table>
+                    </div>
                 }
                 else
                 {

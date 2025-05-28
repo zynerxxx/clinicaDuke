@@ -206,6 +206,9 @@ public class HomeController : Controller
         ViewBag.ProductosStockBajo = model.ProductosStockBajo;
         ViewBag.MovimientosHoy = model.MovimientosHoy;
         ViewBag.MovimientosPorDiaJson = JsonSerializer.Serialize(model.MovimientosPorDia);
+        // Sincronizar el contador de productos próximos a vencer con la lista
+        model.ProductosProximosAVencer = model.ProductosProximosAVencerList.Count;
+        ViewBag.ProductosProximosAVencer = model.ProductosProximosAVencer;
         return View(model);
     }
 

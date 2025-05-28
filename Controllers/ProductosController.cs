@@ -177,7 +177,8 @@ namespace clinicaDukeDB.Controllers
                 IdTipoProducto = p.IdTipoProducto,
                 IdUnidadMedida = p.IdUnidadMedida,
                 Concentracion = p.Concentracion ?? string.Empty,
-                CodigoBarras = p.CodigoBarras ?? string.Empty
+                CodigoBarras = p.CodigoBarras ?? string.Empty,
+                CantidadActual = _context.Stock.FirstOrDefault(s => s.IdProducto == p.Id)?.CantidadActual ?? 0
             }).ToList();
 
             return Json(new {

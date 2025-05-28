@@ -491,6 +491,7 @@
             <thead>
                 <tr>
                     <th>Nombre</th>
+                    <th>Stock</th>
                     <th>Tipo</th>
                     <th>Unidad</th>
                     <th>Concentración</th>
@@ -690,6 +691,7 @@
                 },
                 columns: [
                     { data: 'nombre' },
+                    { data: 'cantidadActual', defaultContent: '0' },
                     { data: 'idTipoProducto', render: function (data) { return tipos[data] || '-'; } },
                     { data: 'idUnidadMedida', render: function (data) { return unidades[data] || '-'; } },
                     { data: 'concentracion', defaultContent: '-' },
